@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+
+
+    "Settings:DefaultCircuitBreakerOpenCircuitTimeSeconds": "10",
+    "Settings:DefaultCircuitBreakerFailureBeforeTripping": "4",
+    "Settings:SafeHttpClientTimeout": "30",
+
+    "Settings:EndpointUrl": "https://example.com"
+
+  }
+}
