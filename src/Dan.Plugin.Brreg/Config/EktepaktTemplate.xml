@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:hef="http://heftelser.losore.brreg.no/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <hef:getLROnlineAsXML>
+      <request>
+        <!--Optional:--><![CDATA[
+         
+<Utveksling>
+	<UtvekslingsHode>
+		<AvsenderID>578 938700710</AvsenderID>
+		<AvsenderPassord/>
+		<AvsenderDato>11.05.2000</AvsenderDato> 
+		<AvsenderKlokke>15:14:00</AvsenderKlokke> 
+		<UtvekslingsRef>MELD1236</UtvekslingsRef> 
+		<MottakerID>578 974760673</MottakerID>
+	</UtvekslingsHode> 
+	<MeldingsHode>
+		<MeldingsType>NTRANS</MeldingsType>
+		<BrukerID>ektepaktUsername</BrukerID> 
+		<BrukerPassord>ektepaktPassword</BrukerPassord> 
+		<FunksjonsType>LRONLINE</FunksjonsType>
+		<Funksjon>KORTV_FNR</Funksjon>
+		<Referanse>12346</Referanse>
+	</MeldingsHode>       
+	<Melding>
+		<Parametre>
+			<ParamVerdi FeltID="FNR">ssn</ParamVerdi>
+		</Parametre>
+	</Melding>
+	<MeldingsHale>
+		<Referanse>12346</Referanse>
+		<AntallMeldinger>1</AntallMeldinger>
+	</MeldingsHale>
+	<UtvekslingsHale>
+		<AvsenderID>578 938700710</AvsenderID> 
+		<UtvekslingsRef>MELD1236</UtvekslingsRef> 
+	</UtvekslingsHale> 
+</Utveksling>
+	
+         
+         ]]>
+      </request>
+    </hef:getLROnlineAsXML>
+  </soapenv:Body>
+</soapenv:Envelope>

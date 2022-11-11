@@ -1,6 +1,6 @@
-using Dan.Plugin.DATASOURCENAME;
 using Microsoft.Extensions.Hosting;
 using Dan.Common.Extensions;
+using Dan.Plugin.Brreg.Config;
 using Microsoft.Extensions.DependencyInjection;
 
 var host = new HostBuilder()
@@ -13,11 +13,15 @@ var host = new HostBuilder()
     .ConfigureServices((context, services) =>
     {
         // Add any additional services here
+        // Add any additional services here
+        services.AddLogging();
+        services.AddHttpClient();
+
+        services.AddHttpClient("SafeHttpClient", client => { client.Timeout = new System.TimeSpan(0, 0, 30); });
 
         // This makes IOption<Settings> available in the DI container.
         var configurationRoot = context.Configuration;
-        services.Configure<Settings>(
-            configurationRoot.GetSection(nameof(Settings)));
+        services.Configure<Settings>(configurationRoot);
     })
     .Build();
 
