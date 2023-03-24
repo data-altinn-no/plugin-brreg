@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nadobe.EvidenceSources.ES_BR
+namespace Dan.Plugin.Brreg.Helpers
 {
     public sealed class FlowingOperationContextScope : IDisposable
     {

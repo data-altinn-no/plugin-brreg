@@ -1,4 +1,4 @@
-﻿using BR_productsservice;
+using BR_productsservice;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,12 +8,12 @@ using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nadobe.EvidenceSources.ES_BR
+namespace Dan.Plugin.Brreg.Models
 {
     class BRProductsUtils
     {
         private const string System = "ALTIN"; //!sic
-      
+
         internal static Product[] Convert(productImpl[] products)
         {
             if (products != null)
@@ -100,8 +100,8 @@ namespace Nadobe.EvidenceSources.ES_BR
                 };
             }
             return null;
-        }        
+        }
     }
-   
+
 }
 

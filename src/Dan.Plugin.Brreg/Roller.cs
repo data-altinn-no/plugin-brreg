@@ -16,11 +16,12 @@ using Dan.Common.Util;
 using Dan.Plugin.Brreg.Config;
 using Dan.Plugin.Brreg.Helpers;
 using Dan.Plugin.Brreg.Models;
+using Dan.Plugin.Brreg.Models.Roller;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Options;
 
-namespace Nadobe.EvidenceSources.ES_BR
+namespace Dan.Plugin.Brreg
 {
     /// <summary>
     /// This class implements the Azure Function entry points for all the functions implemented by this evidence source. 
@@ -32,11 +33,12 @@ namespace Nadobe.EvidenceSources.ES_BR
         private IEvidenceSourceMetadata _metadata;
         private ILogger _logger;
 
-        public Roller(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata metadata)
+        public Roller(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata metadata, ILoggerFactory loggerFactory)
         {
             _client = clientFactory.CreateClient("SafeHttpClient");
             _settings = settings.Value;
             _metadata = metadata;
+            _logger = loggerFactory.CreateLogger<Roller>();
         }
 
         /// <summary>
@@ -54,8 +56,6 @@ namespace Nadobe.EvidenceSources.ES_BR
         [Function("Roller")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
         {
-            _logger = context.GetLogger(context.FunctionDefinition.Name);
-
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
             List<string> roleFilter = null;

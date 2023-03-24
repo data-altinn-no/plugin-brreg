@@ -5,8 +5,10 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading.Tasks;
 using System.ServiceModel.Channels;
+using Dan.Plugin.Brreg.Models;
+using Dan.Plugin.Brreg.Helpers;
 
-namespace Nadobe.EvidenceSources.ES_BR
+namespace Dan.Plugin.Brreg
 {
     class BRProductsService
     {

@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Dan.Plugin.Brreg.Models
+namespace Dan.Plugin.Brreg.Models.Roller
 {
 
     public class RollerResponseBrreg

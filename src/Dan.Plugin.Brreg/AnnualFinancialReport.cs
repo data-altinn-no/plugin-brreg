@@ -14,6 +14,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Dan.Common.Extensions;
 using Dan.Common.Enums;
 using Dan.Common.Interfaces;
+using Dan.Plugin.Brreg;
 using Dan.Plugin.Brreg.Models;
 
 namespace Nadobe.EvidenceSources.ES_BR
@@ -31,18 +32,16 @@ namespace Nadobe.EvidenceSources.ES_BR
         private ILogger _logger;
         private readonly IEvidenceSourceMetadata _metadata;
 
-        public AnnualFinancialReport(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata)
+        public AnnualFinancialReport(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
+            _logger = loggerFactory.CreateLogger<AnnualFinancialReport>();
         }
 
         [Function("AnnualFinancialReport")]
         public async Task<HttpResponseData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
         {
-
-            _logger = context.GetLogger(context.FunctionDefinition.Name);
-
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
 
@@ -57,7 +56,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 numberOfYears = MAX_YEARS;
             }
 
-            var organization = evidenceHarvesterRequest.OrganizationNumber;
+            var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
             return await EvidenceSourceResponse.CreateResponse(req, ()=> GetAnnualFinancialReports(organization, numberOfYears));                
         }
@@ -65,8 +64,6 @@ namespace Nadobe.EvidenceSources.ES_BR
         [Function("Aarsregnskap")]
         public async Task<HttpResponseData> RunAarsregnskapAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
         {
-            _logger = context.GetLogger(context.FunctionDefinition.Name);
-
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
 
@@ -81,7 +78,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 numberOfYears = MAX_YEARS;
             }
 
-            var organization = evidenceHarvesterRequest.OrganizationNumber;
+            var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
             return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReports(organization, numberOfYears));
         }

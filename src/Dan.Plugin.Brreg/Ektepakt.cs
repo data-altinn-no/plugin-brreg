@@ -35,12 +35,14 @@ namespace Nadobe.EvidenceSources.ES_BR
         private HttpClient _client;
         private Settings _settings;
         private readonly IEvidenceSourceMetadata _metadata;
+        private readonly ILogger _logger;
 
-        public Ektepakt(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata)
+        public Ektepakt(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
             _client = clientFactory.CreateClient("SafeHttpClient");
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
+            _logger = loggerFactory.CreateLogger<Ektepakt>();
         }
 
         /// <summary>
@@ -63,18 +65,18 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetEktepaktFromBR(evidenceHarvesterRequest.OrganizationNumber, log));
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetEktepaktFromBR(evidenceHarvesterRequest.SubjectParty, log));
         }
 
-        private async Task<List<EvidenceValue>> GetEktepaktFromBR(string organizationNumber, ILogger log)
+        private async Task<List<EvidenceValue>> GetEktepaktFromBR(Party? party, ILogger log)
         {
             var binDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var rootDirectory = Path.GetFullPath(Path.Combine(binDirectory, ".."));
 
-            string payload = File.ReadAllText(Path.Combine(rootDirectory, "Config\\EktepaktTemplate.xml"));
+            string payload = File.ReadAllText("Config\\EktepaktTemplate.xml");
             payload = payload.Replace("ektepaktUsername", _settings.EktepaktUserName);
             payload = payload.Replace("ektepaktPassword", _settings.EktepaktPassword);
-            payload = payload.Replace("ssn", organizationNumber);
+            payload = payload.Replace("ssn", party.NorwegianSocialSecurityNumber);
 
             var ecb = new EvidenceBuilder(_metadata, "Ektepakt");
 
@@ -85,14 +87,14 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     throw new Exception($"Ektepakt error: Status code != 200, status = {response.StatusCode}");
                 }
-                var mapped = await MapToInternal(response, organizationNumber);
+                var mapped = await MapToInternal(response, party.NorwegianSocialSecurityNumber);
                 ecb.AddEvidenceValue("Default", JsonConvert.SerializeObject(mapped),Constants.SourceLosoreregisteret, false);
                 return ecb.GetEvidenceValues();
 
             } catch (Exception ex)
             {
                 log.LogError($"Ektepakt error {ex.Message}");
-                throw new EvidenceSourceTransientException(Constants.ERROR_NO_REPORT_AVAILABLE, $"Error looking up ektepakt for {organizationNumber}");
+                throw new EvidenceSourceTransientException(Constants.ERROR_NO_REPORT_AVAILABLE, $"Error looking up ektepakt for {party.GetAsString()}");
             }
         }
 

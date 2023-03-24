@@ -5,8 +5,16 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dan.Common" Version="1.0.0-preview6" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.3.0" OutputItemType="Analyzer" />
+    <None Remove="Config\EktepaktTemplate.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\EktepaktTemplate.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dan.Common" Version="1.3.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.9.0-preview1" OutputItemType="Analyzer" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
     <PackageReference Include="NJsonSchema" Version="10.8.0" />

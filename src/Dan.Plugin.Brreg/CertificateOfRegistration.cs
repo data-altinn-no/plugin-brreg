@@ -28,11 +28,13 @@ namespace Dan.Plugin.Brreg {
         private const int REPORT_CODE = 2000;
         private Settings _settings;
         private readonly IEvidenceSourceMetadata _metadata;
+        private readonly ILogger _logger;
 
-    public CertificateOfRegistration(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata)
+    public CertificateOfRegistration(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
+            _logger = loggerFactory.CreateLogger<CertificateOfRegistration>();
         }
 
         /// <summary>
@@ -49,7 +51,7 @@ namespace Dan.Plugin.Brreg {
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetCertificateOfRegistration(evidenceHarvesterRequest.OrganizationNumber));
+            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace Dan.Plugin.Brreg {
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetCertificateOfRegistration(evidenceHarvesterRequest.OrganizationNumber));
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
 
         /// <summary>

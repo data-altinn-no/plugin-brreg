@@ -59,7 +59,7 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetUnitBasicInformationFromBrreg(evidenceHarvesterRequest.OrganizationNumber, _client));
+            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetUnitBasicInformationFromBrreg(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, _client));
         }
 
         /// <summary>
