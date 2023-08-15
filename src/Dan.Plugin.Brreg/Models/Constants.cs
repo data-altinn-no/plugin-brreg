@@ -21,5 +21,8 @@ namespace Dan.Plugin.Brreg.Models
         public static int ERROR_PRODUCT_LIST_NOT_AVAILABLE = 10;
         public static string SourceLosoreregisteret = "Løsøreregisteret";
         public static string SourceRegnskapsregisteret = "Regnskapsregisteret";
+        public static string EBEVIS = "eBevis";
+        public static string SERIOSITET = "Seriøsitetsinformasjon";
+        public static string EDUEDILIGENCE = "eDueDiligence";
     }
 }

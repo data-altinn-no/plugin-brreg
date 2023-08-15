@@ -159,7 +159,7 @@ namespace Dan.Plugin.Brreg
             {
                 EvidenceCodeName = "Roller",
                 Description = "Enhetsregisteret",
-                BelongsToServiceContexts = new List<string>() { "eBevis" },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE },
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue

@@ -82,7 +82,7 @@ namespace Dan.Plugin.Brreg {
                 EvidenceCodeName = nameof(CertificateOfRegistration),
                 Description = "Code for retrieving URL to a PDF for the certificate of registration",
                 ServiceContext = "eBevis",
-                BelongsToServiceContexts = new List<string>() { "eBevis" },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()
@@ -96,35 +96,15 @@ namespace Dan.Plugin.Brreg {
                 {
                     new PartyTypeRequirement()
                     {
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency)
                         }
-                    }
-                }
-            };
-        }
-
-        public static EvidenceCode GetDefinitionSeriositet()
-        {
-            return new EvidenceCode()
-            {
-                EvidenceCodeName = "Firmaattest",
-                Description = "Code for retrieving URL to a PDF for the certificate of registration",
-                BelongsToServiceContexts = {"Seriøsitetsinformasjon"},
-                Values = new List<EvidenceValue>
-                {
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "CertificateOfRegistrationPdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    }
-                },
-                AuthorizationRequirements = new List<Requirement>()
-                {
+                    },
                     new PartyTypeRequirement()
                     {
+                        AppliesToServiceContext = new List<string>() { Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PrivateEnterprise)
@@ -133,6 +113,8 @@ namespace Dan.Plugin.Brreg {
                 }
             };
         }
+
+ 
         private async Task<List<EvidenceValue>> GetCertificateOfRegistration(string organization)
         {
             Product[] availableProducts;

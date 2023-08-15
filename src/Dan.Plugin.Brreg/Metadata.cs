@@ -42,15 +42,14 @@ namespace Nadobe.EvidenceSources.ES_BR {
             return new List<EvidenceCode>
             {
                 CertificateOfRegistration.GetDefinition(),
-                CertificateOfRegistration.GetDefinitionSeriositet(), //added temp for Seriøsitetspilot
                 AnnualFinancialReport.GetDefinition(),
-                AnnualFinancialReport.GetDefinitionSeriositet(),
                 UnitBasicInformation.GetDefinition(),              
                 Konkurs.GetDefinition(),
                 Ektepakt.GetDefinition(),
                 Regnskapsregisteret.GetDefinitionRegnskap(),
                 Regnskapsregisteret.GetDefinitionRegnskapId(),
-                Roller.GetDefinition()
+                Roller.GetDefinition(),
+                Kunngjoringer.GetDefinition()
             };
         }
     }

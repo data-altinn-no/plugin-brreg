@@ -74,7 +74,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 EvidenceCodeName = "UnitBasicInformation",
                 Description = "Return units basic information for the subject company",
-                BelongsToServiceContexts = new List<string>() { "eBevis" },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET },
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()

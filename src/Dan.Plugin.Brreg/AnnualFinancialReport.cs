@@ -94,7 +94,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 EvidenceCodeName = nameof(AnnualFinancialReport),
                 Description = "Code for retrieving URLs to PDFs for annual financial reports (1-5 years) synchronously",
                 IsAsynchronous = false,
-                BelongsToServiceContexts = new List<string>() { "eBevis"},
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.SERIOSITET },
                 Parameters = new List<EvidenceParameter>
                 {
                     new EvidenceParameter
@@ -171,106 +171,28 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     new PartyTypeRequirement()
                     {
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS }, 
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
+                            
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency)
                         }
-                    }
-                }
-            };
-        }
-
-        /// <summary>
-        /// The evidence code definition
-        /// </summary>
-        /// <returns>The definition</returns>
-        public static EvidenceCode GetDefinitionSeriositet()
-        {
-            return new EvidenceCode
-            {
-                EvidenceCodeName = "Aarsregnskap",
-                Description = "Code for retrieving URLs to PDFs for annual financial reports (1-5 years) synchronously",
-                IsAsynchronous = false,
-                BelongsToServiceContexts = new List<string>() { "Seriøsitetsinformasjon" },
-                Parameters = new List<EvidenceParameter>
-                {
-                    new EvidenceParameter
-                    {
-                        EvidenceParamName = "NumberOfYears",
-                        ParamType = EvidenceParamType.Number,
-                        Required = true
-                    }
-                },
-                Values = new List<EvidenceValue>
-                {
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year1",
-                        ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
                     },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year1PdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year2",
-                        ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year2PdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year3",
-                        ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year3PdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year4",
-                        ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year4PdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year5",
-                        ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue
-                    {
-                        EvidenceValueName = "Year5PdfUrl",
-                        ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    }
-                },
-                AuthorizationRequirements = new List<Requirement>()
-                {
                     new PartyTypeRequirement()
                     {
+                        AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.SERIOSITET },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
+
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PrivateEnterprise)
+                        }
+                    },
+                    new AccreditationPartyRequirement()
+                    {
+                        AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.SERIOSITET },
+                        PartyRequirements = new List<AccreditationPartyRequirementType>()
+                        {
+                            AccreditationPartyRequirementType.RequestorAndOwnerAreEqual
                         }
                     }
                 }
