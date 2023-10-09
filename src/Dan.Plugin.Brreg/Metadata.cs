@@ -49,7 +49,11 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 Regnskapsregisteret.GetDefinitionRegnskap(),
                 Regnskapsregisteret.GetDefinitionRegnskapId(),
                 Roller.GetDefinition(),
-                Kunngjoringer.GetDefinition()
+                Kunngjoringer.GetDefinition(),
+                Losore.GetDefinitionEktepaktV2(),
+                Losore.GetDefinitionRettsstiftelserKjoretoy(),
+                //Losore.GetDefinitionRettsstiftelserPerson(),
+                Losore.GetDefinitionRettsstiftelserVirksomhet()
             };
         }
     }

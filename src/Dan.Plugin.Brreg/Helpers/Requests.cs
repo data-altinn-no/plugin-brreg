@@ -87,5 +87,35 @@ namespace Dan.Plugin.Brreg.Helpers
         }
 
 
+        public static async Task<T> GetData<T>(HttpClient client, string url, ILogger logger) where T : new()
+        {
+            var response = await client.GetAsync(url);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError(responseContent);
+
+                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    throw new EvidenceSourceTransientException(Constants.ERROR_CCR_UPSTREAM_ERROR, "Remote endpoint does not respond. Try again later.");
+                } else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw new EvidenceSourceTransientException(Constants.ERROR_AUTHENTICATION, "Remote authentication failed.");
+                } else if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    throw new EvidenceSourcePermanentClientException(Constants.ERROR_PERSON_NOT_FOUND, "Invalid identification number");
+                }
+                else
+                {
+                    throw new EvidenceSourceTransientException(Constants.ERROR_UNKNOWN, "Unknown status code");
+                }
+            }
+            else
+            {
+                return JsonConvert.DeserializeObject<T>(responseContent);
+            }
+        }
+
+
     }
 }

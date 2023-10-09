@@ -1,4 +1,8 @@
+using Dan.Plugin.Skatteetaten.Config;
 using System;
+using System.IO;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography.X509Certificates;
 // using System.Configuration;
 
 namespace Dan.Plugin.Brreg.Config
@@ -25,5 +29,26 @@ namespace Dan.Plugin.Brreg.Config
         public string RegnskapsregisteretUsername { get; set; }
 
         public string AnnouncementUrl { get; set; }
+
+        public string VaultName { get; set; }
+
+        public string CertName { get; set; }
+
+        public string LosoreURI { get; set; }
+
+        public string EktepaktV2Uri { get; set; }
+        private string EncodedX509Cert { get; set; }
+
+        public string Certificate
+        {
+            get
+            {
+                return EncodedX509Cert ?? new PluginKeyVault(VaultName).GetCertificateAsBase64(CertName).Result;
+            }
+            set
+            {
+                EncodedX509Cert = value;
+            }
+        }
     }
 }

@@ -19,10 +19,15 @@ namespace Dan.Plugin.Brreg.Models
         public static int ERROR_ASYNC_HARVEST_NOT_AVAILABLE = 8;
         public static int ERROR_CERTIFICATE_OF_REGISTRATION_NOT_AVAILABLE = 9;
         public static int ERROR_PRODUCT_LIST_NOT_AVAILABLE = 10;
+        public static int ERROR_AUTHENTICATION = 11;
+        public static int ERROR_PERSON_NOT_FOUND = 12;
+        public static int ERROR_UNKNOWN = 13;
+        public static int ERROR_PARAMETERS_MISSING = 14;
         public static string SourceLosoreregisteret = "Løsøreregisteret";
         public static string SourceRegnskapsregisteret = "Regnskapsregisteret";
-        public static string EBEVIS = "eBevis";
-        public static string SERIOSITET = "Seriøsitetsinformasjon";
-        public static string EDUEDILIGENCE = "eDueDiligence";
+        public const string EBEVIS = "eBevis";
+        public const string SERIOSITET = "Seriøsitetsinformasjon";
+        public const string EDUEDILIGENCE = "eDueDiligence";
+        public const string DD = "OED";
     }
 }
