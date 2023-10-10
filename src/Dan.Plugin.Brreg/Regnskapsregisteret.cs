@@ -81,7 +81,7 @@ namespace ES_BR
             {
                 EvidenceCodeName = "Regnskapsregisteret",
                 Description = "The public accounts of an organization",
-                BelongsToServiceContexts = new List<string>() { "eBevis" },
+                BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE, Constants.EBEVIS },
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()
@@ -95,7 +95,7 @@ namespace ES_BR
                 {
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { "eBevis"},
+                        AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.EBEVIS},
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         { 
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency),

@@ -94,7 +94,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 EvidenceCodeName = nameof(AnnualFinancialReport),
                 Description = "Code for retrieving URLs to PDFs for annual financial reports (1-5 years) synchronously",
                 IsAsynchronous = false,
-                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                 Parameters = new List<EvidenceParameter>
                 {
                     new EvidenceParameter
