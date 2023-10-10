@@ -94,7 +94,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 EvidenceCodeName = nameof(AnnualFinancialReport),
                 Description = "Code for retrieving URLs to PDFs for annual financial reports (1-5 years) synchronously",
                 IsAsynchronous = false,
-                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.SERIOSITET },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                 Parameters = new List<EvidenceParameter>
                 {
                     new EvidenceParameter
@@ -171,7 +171,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS }, 
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE }, 
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
                             
@@ -180,7 +180,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                     },
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.SERIOSITET },
+                        AppliesToServiceContext = new List<string>() { Constants.SERIOSITET },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
 
