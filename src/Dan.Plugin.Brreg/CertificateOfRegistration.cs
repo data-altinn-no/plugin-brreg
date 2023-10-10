@@ -96,7 +96,7 @@ namespace Dan.Plugin.Brreg {
                 {
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS },
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE  },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency)
@@ -104,7 +104,7 @@ namespace Dan.Plugin.Brreg {
                     },
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { Constants.SERIOSITET, Constants.EDUEDILIGENCE },
+                        AppliesToServiceContext = new List<string>() { Constants.SERIOSITET},
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PrivateEnterprise)
