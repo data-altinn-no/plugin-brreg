@@ -1,17 +1,12 @@
 using Altinn.ApiClients.Maskinporten.Config;
-using Microsoft.Extensions.Hosting;
+using Altinn.ApiClients.Maskinporten.Extensions;
+using Altinn.ApiClients.Maskinporten.Services;
 using Dan.Common.Extensions;
 using Dan.Plugin.Brreg.Config;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Altinn.ApiClients.Maskinporten.Extensions;
-using Altinn.ApiClients.Maskinporten.Services;
-using System;
-using System.IO;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System;
 
 var host = new HostBuilder()
     .ConfigureDanPluginDefaults()

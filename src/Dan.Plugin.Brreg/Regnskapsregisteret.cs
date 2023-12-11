@@ -118,7 +118,7 @@ namespace ES_BR
             {
                 EvidenceCodeName = "RegnskapsregisteretId",
                 Description = "The specified public accounts of an organization",
-                BelongsToServiceContexts = new List<string>() { "eBevis" },
+                BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE, Constants.EBEVIS },
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()

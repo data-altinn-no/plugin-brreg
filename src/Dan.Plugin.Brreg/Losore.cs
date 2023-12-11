@@ -32,7 +32,6 @@ namespace Dan.Plugin.Brreg
 
     public class Losore
     {
-        public HttpClient _client;
         private ILogger _logger;
         private readonly IEvidenceSourceMetadata _metadata;
         private Settings _settings;
@@ -40,30 +39,10 @@ namespace Dan.Plugin.Brreg
 
         public Losore(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata metadata, ILoggerFactory loggerFactory)
         {
-            _client = clientFactory.CreateClient("SafeHttpClient");
             _metadata = metadata;
             _settings = settings.Value;
             _logger = loggerFactory.CreateLogger<Losore>();
             _maskinportenClient = clientFactory.CreateClient("myMaskinportenClient");
-        }
-
-        [Function("EktepaktV2")]
-        public async Task<HttpResponseData> GetEktepaktV2([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
-        {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetValuesEktepakt(evidenceHarvesterRequest.SubjectParty.NorwegianSocialSecurityNumber));
-        }
-
-        private async Task<List<EvidenceValue>> GetValuesEktepakt(string identifier)
-        {
-            var url = _settings.EktepaktV2Uri + $"/api/v1/fnr/{identifier}?spraakkode=NOB";
-
-            var response = await Requests.GetData<EktepaktV2>(_maskinportenClient, url, _logger);
-
-            var ecb = new EvidenceBuilder(_metadata, "EktepaktV2");
-            ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(response), "Løsøreregisteret", false);
-            return ecb.GetEvidenceValues();
         }
 
         [Function("RettsstiftelserVirksomhet")]

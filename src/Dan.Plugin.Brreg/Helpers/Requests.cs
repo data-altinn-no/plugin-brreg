@@ -91,6 +91,7 @@ namespace Dan.Plugin.Brreg.Helpers
         {
             var response = await client.GetAsync(url);
             var responseContent = await response.Content.ReadAsStringAsync();
+
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(responseContent);
@@ -101,11 +102,17 @@ namespace Dan.Plugin.Brreg.Helpers
                 } else if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     throw new EvidenceSourceTransientException(Constants.ERROR_AUTHENTICATION, "Remote authentication failed.");
-                } else if (response.StatusCode == HttpStatusCode.BadRequest)
+                } else if (response.StatusCode == HttpStatusCode.Forbidden)
                 {
                     throw new EvidenceSourcePermanentClientException(Constants.ERROR_PERSON_NOT_FOUND, "Invalid identification number");
+                } else if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw new EvidenceSourcePermanentClientException(Constants.ERROR_PERSON_NOT_FOUND, "Invalid identification number, subject not found");
+                } else if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    throw new EvidenceSourceTransientException(Constants.ERROR_CCR_UPSTREAM_ERROR, "Could not access Remote endpoint. Try again later.");
                 }
-                else
+                else 
                 {
                     throw new EvidenceSourceTransientException(Constants.ERROR_UNKNOWN, "Unknown status code");
                 }

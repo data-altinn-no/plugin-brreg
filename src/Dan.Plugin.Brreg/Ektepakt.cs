@@ -21,6 +21,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Dan.Plugin.Brreg.Helpers;
+using Dan.Plugin.Brreg.Models.EktepaktV2;
 using NJsonSchema;
 
 
@@ -32,14 +34,14 @@ namespace Nadobe.EvidenceSources.ES_BR
     /// </summary>   
     public class Ektepakt
     {
-        private HttpClient _client;
+        private HttpClient _maskinportenClient;
         private Settings _settings;
         private readonly IEvidenceSourceMetadata _metadata;
         private readonly ILogger _logger;
 
         public Ektepakt(IHttpClientFactory clientFactory, IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
-            _client = clientFactory.CreateClient("SafeHttpClient");
+            _maskinportenClient = clientFactory.CreateClient("myMaskinportenClient");
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
             _logger = loggerFactory.CreateLogger<Ektepakt>();
@@ -64,70 +66,42 @@ namespace Nadobe.EvidenceSources.ES_BR
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, ILogger log)
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetEktepaktFromBR(evidenceHarvesterRequest.SubjectParty, log));
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetValuesEktepakt(evidenceHarvesterRequest.SubjectParty.NorwegianSocialSecurityNumber));
         }
 
-        private async Task<List<EvidenceValue>> GetEktepaktFromBR(Party? party, ILogger log)
+        private async Task<List<EvidenceValue>> GetValuesEktepakt(string identifier)
         {
-            var binDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var rootDirectory = Path.GetFullPath(Path.Combine(binDirectory, ".."));
+            var url = _settings.EktepaktV2Uri + $"/api/v1/fnr/{identifier}?spraakkode=NOB";
 
-            string payload = File.ReadAllText("Config\\EktepaktTemplate.xml");
-            payload = payload.Replace("ektepaktUsername", _settings.EktepaktUserName);
-            payload = payload.Replace("ektepaktPassword", _settings.EktepaktPassword);
-            payload = payload.Replace("ssn", party.NorwegianSocialSecurityNumber);
+            var response = await Requests.GetData<EktepaktV2>(_maskinportenClient, url, _logger);
+
+            var mappedObject = MapEktepaktDD(response);
 
             var ecb = new EvidenceBuilder(_metadata, "Ektepakt");
-
-            try
-            {
-                var response = await _client.PostAsync($"{_settings.EktepaktUri}/losore/heftelser/LosoreOnlineService", new StringContent(payload, Encoding.UTF8, "text/xml"));
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new Exception($"Ektepakt error: Status code != 200, status = {response.StatusCode}");
-                }
-                var mapped = await MapToInternal(response, party.NorwegianSocialSecurityNumber);
-                ecb.AddEvidenceValue("Default", JsonConvert.SerializeObject(mapped),Constants.SourceLosoreregisteret, false);
-                return ecb.GetEvidenceValues();
-
-            } catch (Exception ex)
-            {
-                log.LogError($"Ektepakt error {ex.Message}");
-                throw new EvidenceSourceTransientException(Constants.ERROR_NO_REPORT_AVAILABLE, $"Error looking up ektepakt for {party.GetAsString()}");
-            }
+            ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(mappedObject), "Løsøreregisteret", false);
+            return ecb.GetEvidenceValues();
         }
 
-        private async Task<EktepaktResponse> MapToInternal(HttpResponseMessage response, string ssn)
+        private EktepaktResponse MapEktepaktDD(EktepaktV2 input)
         {
-            EktepaktResponse ektepaktResponse = new EktepaktResponse() { Ektepakter = new List<EktepaktModel>() };
-
-            XElement soapResponse = XElement.Load(await response.Content.ReadAsStreamAsync());
-            string xmlResponse = soapResponse?.Descendants("return").FirstOrDefault()?.Value;
-            if (xmlResponse == null)
+            var response = new EktepaktResponse()
             {
-                throw new Exception($"No xml data returned looking up ektepakt for {ssn}");
+                Ektepakter = new List<EktepaktModel>()
+            };
+
+            foreach (var a in input.ektepakt)
+            {
+                var item = new EktepaktModel()
+                {
+                    SpouseName = a.rolle[1].person.navn.fornavn + " " + a.rolle[1].person.navn.etternavn,
+                    EntryDate = a.innkomsttidspunkt
+                };
+
+                response.Ektepakter.Add(item);
             }
 
-            XElement returnXml = XElement.Parse(xmlResponse);
-            foreach (XElement dagbok in returnXml.Descendants("Dagbok_Kortv"))
-                if (dagbok.Elements("doktype").FirstOrDefault()?.Value == "EP")
-                {
-                    DateTime? date = null;
-
-                    if (dagbok.Elements("dgbdato").FirstOrDefault() != null)
-                    {
-                        date = DateTime.ParseExact(dagbok.Elements("dgbdato").FirstOrDefault()?.Value, "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                    }
-
-                    ektepaktResponse.Ektepakter.Add(new EktepaktModel()
-                    {
-                        Date = date,
-                        SpouseName = dagbok.Elements("kreditor").FirstOrDefault()?.Value
-                    });
-                }
-
-            return ektepaktResponse;
+            return response;
         }
 
         /// <summary>
@@ -145,7 +119,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     new EvidenceValue()
                     {
-                        EvidenceValueName = "Default",
+                        EvidenceValueName = "default",
                         ValueType = EvidenceValueType.JsonSchema,
                         JsonSchemaDefintion = JsonSchema.FromType<EktepaktResponse>().ToJson(Formatting.Indented),
                         Source = Constants.SourceLosoreregisteret
