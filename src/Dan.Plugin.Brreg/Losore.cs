@@ -193,7 +193,8 @@ namespace Dan.Plugin.Brreg
                         EvidenceValueName = "default",
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}"
+                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
+                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
@@ -224,7 +225,8 @@ namespace Dan.Plugin.Brreg
                         EvidenceValueName = "default",
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}"
+                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
+                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
