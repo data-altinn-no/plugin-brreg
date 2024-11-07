@@ -78,7 +78,7 @@ namespace Dan.Plugin.Brreg
 
         private async Task<List<EvidenceValue>> GetRettsstiftelserValuesKjoretoy(EvidenceHarvesterRequest ehr)
         {
-            if (!ehr.TryGetParameter("RegistreringsNummer", out string regnr))
+            if (!ehr.TryGetParameter("Registreringsnummer", out string regnr))
             {
                 throw new EvidenceSourcePermanentClientException(Constants.ERROR_PARAMETERS_MISSING, "Missing registration number");
             }
