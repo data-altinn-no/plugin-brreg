@@ -137,6 +137,7 @@ namespace Dan.Plugin.Brreg
                 EvidenceCodeName = "RettsstiftelserKjoretoy",
                 BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE },
                 Description = "Henter rettsstiftelser om kjøretøy - alle parter på authenticationrequest må settes til spørrende organisasjonsnummer",
+                EvidenceSource = "Brreg",
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
@@ -186,6 +187,7 @@ namespace Dan.Plugin.Brreg
                 EvidenceCodeName = "RettsstiftelserVirksomhet",
                 BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE },
                 Description = "",
+                EvidenceSource = "Brreg",
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
