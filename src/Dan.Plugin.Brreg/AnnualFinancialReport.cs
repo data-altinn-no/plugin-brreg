@@ -20,7 +20,7 @@ using Dan.Plugin.Brreg.Models;
 namespace Nadobe.EvidenceSources.ES_BR
 {
     /// <summary>
-    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source. 
+    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source.
     /// </summary>
     public class AnnualFinancialReport
     {
@@ -45,7 +45,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
 
-            var numberOfYears = int.Parse(evidenceHarvesterRequest.GetParameter("NumberOfYears").Value.ToString());
+            evidenceHarvesterRequest.TryGetParameter("NumberOfYears", out int numberOfYears);
 
             if (numberOfYears < MIN_YEARS)
             {
@@ -58,7 +58,7 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
-            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetAnnualFinancialReports(organization, numberOfYears));                
+            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetAnnualFinancialReports(organization, numberOfYears));
         }
 
         [Function("Aarsregnskap")]
@@ -67,7 +67,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
 
-            var numberOfYears = int.Parse(evidenceHarvesterRequest.GetParameter("NumberOfYears").Value.ToString());
+            evidenceHarvesterRequest.TryGetParameter("NumberOfYears", out int numberOfYears);
 
             if (numberOfYears < MIN_YEARS)
             {
@@ -171,10 +171,10 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     new PartyTypeRequirement()
                     {
-                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE }, 
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE },
                         AllowedPartyTypes = new AllowedPartyTypesList()
                         {
-                            
+
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency)
                         }
                     },
