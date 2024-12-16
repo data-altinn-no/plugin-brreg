@@ -40,7 +40,9 @@ namespace ES_BR
             _logger = context.GetLogger(context.FunctionDefinition.Name);
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, int.Parse(evidenceHarvesterRequest.GetParameter("Aar").Value.ToString()), evidenceHarvesterRequest.GetParameter("Type").Value.ToString()));
+            evidenceHarvesterRequest.TryGetParameter("Aar", out int aar);
+            evidenceHarvesterRequest.TryGetParameter("Type", out string type);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, aar, type));
         }
 
         [Function("RegnskapsregisteretId")]
@@ -49,7 +51,8 @@ namespace ES_BR
             _logger = context.GetLogger(context.FunctionDefinition.Name);
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskapId(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, evidenceHarvesterRequest.GetParameter("Id").Value.ToString()));
+            evidenceHarvesterRequest.TryGetParameter("Id", out string id);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskapId(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, id));
         }
 
         private async Task<List<EvidenceValue>> GetRegnskap(string orgno, int year, string type = "SELSKAP")
@@ -97,7 +100,7 @@ namespace ES_BR
                     {
                         AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.EBEVIS},
                         AllowedPartyTypes = new AllowedPartyTypesList()
-                        { 
+                        {
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency),
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Subject, PartyTypeConstraint.PrivateEnterprise)
                         }
@@ -144,6 +147,6 @@ namespace ES_BR
                     new EvidenceParameter() { EvidenceParamName = "Id", ParamType = EvidenceParamType.Number, Required = true }
                 }
             };
-        }        
+        }
     }
 }
