@@ -29,5 +29,7 @@ namespace Dan.Plugin.Brreg.Models
         public const string SERIOSITET = "Seriøsitetsinformasjon";
         public const string EDUEDILIGENCE = "eDueDiligence";
         public const string DD = "OED";
+        public const string DIGOKFRIV = "Digøk-friv";
+
     }
 }

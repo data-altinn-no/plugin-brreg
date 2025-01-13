@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Nadobe.EvidenceSources.ES_BR
 {
+    using Google.Protobuf;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using System;
@@ -74,7 +75,8 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 EvidenceCodeName = "UnitBasicInformation",
                 Description = "Return units basic information for the subject company",
-                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV },
+                IsPublic = true,
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()

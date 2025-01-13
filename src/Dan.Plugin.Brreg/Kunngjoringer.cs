@@ -55,7 +55,8 @@ namespace Dan.Plugin.Brreg
             {
                 Description = "Link to announcements regarding an enterprise",
                 EvidenceCodeName = "Kunngjoringer",
-                BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE },
+                BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE, Constants.DIGOKFRIV },
+                IsPublic = true,
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
