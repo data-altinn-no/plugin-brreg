@@ -108,10 +108,10 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             return new EvidenceCode()
             {
-                EvidenceCodeName = "EktepaktV2",
+                EvidenceCodeName = "Ektepakt",
                 BelongsToServiceContexts = new List<string>() { Constants.DD },
                 Description = "List marriage settlements",
-                DatasetAliases = new () { new () { DatasetAliasName = "Ektepakt", ServiceContext = Constants.DD } },
+                DatasetAliases = new () { new () { DatasetAliasName = "EktepaktV2", ServiceContext = Constants.DD } },
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
