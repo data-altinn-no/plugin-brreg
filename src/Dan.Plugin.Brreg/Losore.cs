@@ -110,26 +110,6 @@ namespace Dan.Plugin.Brreg
             return ecb.GetEvidenceValues();
         }
 
-        public static EvidenceCode GetDefinitionEktepaktV2()
-        {
-            return new EvidenceCode()
-            {
-                EvidenceCodeName = "EktepaktV2",
-                BelongsToServiceContexts = new List<string>() { Constants.DD },
-                Description = "List marriage settlements",
-                Values = new List<EvidenceValue>()
-                {
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "default",
-                        Source = Constants.SourceLosoreregisteret,
-                        ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}"
-                    }
-                }
-            };
-        }
-
         public static EvidenceCode GetDefinitionRettsstiftelserKjoretoy()
         {
             return new EvidenceCode()

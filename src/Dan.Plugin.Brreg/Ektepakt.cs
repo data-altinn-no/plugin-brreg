@@ -104,28 +104,25 @@ namespace Nadobe.EvidenceSources.ES_BR
             return response;
         }
 
-        /// <summary>
-        /// Returns the evidence code definition
-        /// </summary>
-        /// <returns>The evidence code definition</returns>
-        public static EvidenceCode GetDefinition()
+        public static EvidenceCode GetDefinitionEktepaktV2()
         {
             return new EvidenceCode()
             {
-                EvidenceCodeName = "Ektepakt",
-                Description = "Løseøreregisteret",
-                BelongsToServiceContexts = new List<string>() { "OED" },
-                Values = new List<EvidenceValue>
+                EvidenceCodeName = "EktepaktV2",
+                BelongsToServiceContexts = new List<string>() { Constants.DD },
+                Description = "List marriage settlements",
+                DatasetAliases = new () { new () { DatasetAliasName = "Ektepakt", ServiceContext = Constants.DD } },
+                Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
                     {
                         EvidenceValueName = "default",
+                        Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
-                        JsonSchemaDefintion = JsonSchema.FromType<EktepaktResponse>().ToJson(Formatting.Indented),
-                        Source = Constants.SourceLosoreregisteret
+                        Description = $"Json payload from {Constants.SourceLosoreregisteret}"
                     }
-                }               
+                }
             };
-        }       
+        }
     }
 }
