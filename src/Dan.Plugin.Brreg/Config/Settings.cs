@@ -29,7 +29,7 @@ namespace Dan.Plugin.Brreg.Config
         public string RegnskapsregisteretUsername { get; set; }
 
         public string AnnouncementUrl { get; set; }
-
+        public string StotteregisterUrl { get; set; }
         public string VaultName { get; set; }
 
         public string CertName { get; set; }

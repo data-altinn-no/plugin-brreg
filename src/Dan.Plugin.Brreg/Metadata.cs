@@ -52,7 +52,8 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 Ektepakt.GetDefinitionEktepaktV2(),
                 Losore.GetDefinitionRettsstiftelserKjoretoy(),
                 //Losore.GetDefinitionRettsstiftelserPerson(),
-                Losore.GetDefinitionRettsstiftelserVirksomhet()
+                Losore.GetDefinitionRettsstiftelserVirksomhet(),
+                Stotteregisteret.GetDefinition(),
             };
         }
     }
