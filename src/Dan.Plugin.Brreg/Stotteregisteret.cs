@@ -30,7 +30,7 @@ namespace Dan.Plugin.Brreg
             _metadata = evidenceSourceMetadata;
         }
 
-        [Function("StotteregisterLink")]
+        [Function("StotteregisteretUrl")]
         public async Task<HttpResponseData> StotteregisterLink([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
