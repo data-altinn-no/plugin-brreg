@@ -17,20 +17,20 @@ using Constants = Dan.Plugin.Brreg.Models.Constants;
 
 namespace Dan.Plugin.Brreg
 {
-    public class Stotteregisteret
+    public class Tilskuddsregisteret
     {
         private readonly ILogger _logger;
         private Settings _settings;
         private readonly IEvidenceSourceMetadata _metadata;
 
-        public Stotteregisteret(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
+        public Tilskuddsregisteret(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<Kunngjoringer>();
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
         }
 
-        [Function("StotteregisteretUrl")]
+        [Function("TilskuddsregisteretUrl")]
         public async Task<HttpResponseData> StotteregisterLink([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -40,9 +40,9 @@ namespace Dan.Plugin.Brreg
 
         private async Task<List<EvidenceValue>> GetStotteregisterLink(string norwegianOrganizationNumber)
         {
-            var url = string.Format(_settings.StotteregisterUrl, norwegianOrganizationNumber);
+            var url = string.Format(_settings.TilskuddsregisterUrl, norwegianOrganizationNumber);
 
-            var eb = new EvidenceBuilder(_metadata, "StotteregisteretUrl");
+            var eb = new EvidenceBuilder(_metadata, "TilskuddsregisteretUrl");
 
             eb.AddEvidenceValue($"url", url);
 
@@ -54,7 +54,7 @@ namespace Dan.Plugin.Brreg
             return new EvidenceCode()
             {
                 Description = "Link to grants",
-                EvidenceCodeName = "StotteregisteretUrl",
+                EvidenceCodeName = "TilskuddsregisteretUrl",
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 IsPublic = true,
                 Values = new List<EvidenceValue>()
@@ -63,7 +63,7 @@ namespace Dan.Plugin.Brreg
                     {
                         EvidenceValueName = "url",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceStotteRegisteret
+                        Source = Constants.SourceTilskuddsregisteret
                     }
                 }
             };

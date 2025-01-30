@@ -12,6 +12,8 @@ namespace Dan.Plugin.Brreg.Config
     /// </summary>
     public class Settings 
     {
+        public string TilskuddsregisterUrl { get; set; }
+
         public string ES_BR_ProductsUserName { get; set; }
 
         public string ES_BR_ProductsPassword { get; set; }

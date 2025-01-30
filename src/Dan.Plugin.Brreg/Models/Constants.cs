@@ -32,5 +32,6 @@ namespace Dan.Plugin.Brreg.Models
         public const string DIGOKFRIV = "Digøk-friv";
         public static string SourceStotteRegisteret = "Støtteregisteret";
 
+        public const string SourceTilskuddsregisteret = "Tilskudd.no";
     }
 }
