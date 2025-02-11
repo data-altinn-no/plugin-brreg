@@ -60,14 +60,11 @@ namespace Dan.Plugin.Brreg
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
             List<string> roleFilter = null;
             var roleFilterParameter = evidenceHarvesterRequest.Parameters?.FirstOrDefault();
-            if (roleFilterParameter != null)
-            {
-                if (roleFilterParameter.Value.ToString() != null)
-                {
-                    roleFilter = roleFilterParameter.Value.ToString() == "*" // Include all roles
-                        ? null 
-                        : roleFilterParameter.Value.ToString()!.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
+            if (roleFilterParameter != null && roleFilterParameter.Value != null)
+            {              
+                roleFilter = roleFilterParameter.Value.ToString() == "*" // Include all roles
+                    ? null 
+                    : roleFilterParameter.Value.ToString()!.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();                
             }
             else
             {
@@ -79,7 +76,7 @@ namespace Dan.Plugin.Brreg
                 };
             }
 
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetRolesFromBrreg(evidenceHarvesterRequest.OrganizationNumber, roleFilter, _logger));
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetRolesFromBrreg(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, roleFilter, _logger));
         }
 
         private async Task<List<EvidenceValue>> GetRolesFromBrreg(string organizationNumber, List<string> roleFilter, ILogger log)
