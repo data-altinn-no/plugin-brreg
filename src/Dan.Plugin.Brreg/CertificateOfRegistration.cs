@@ -54,6 +54,24 @@ namespace Dan.Plugin.Brreg {
             return await EvidenceSourceResponse.CreateResponse(req, ()=> GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
 
+
+        /// <summary>
+        /// Function entry point: Certificate of Registration
+        /// </summary>
+        /// <param name="req">
+        /// The HTTP request.
+        /// </param>
+        /// <returns>
+        /// A <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        [Function("CertificateOfRegistrationOpen")]
+        public async Task<HttpResponseData> RunOpen([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, ILogger log)
+        {
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
+        }
+
         /// <summary>
         /// Function entry point: Certificate of Registration
         /// </summary>
@@ -114,7 +132,27 @@ namespace Dan.Plugin.Brreg {
             };
         }
 
- 
+        public static EvidenceCode GetDefinitionOpen()
+        {
+            return new EvidenceCode()
+            {
+                EvidenceCodeName = "CertificateOfRegistrationOpen",
+                Description = "Code for retrieving URL to a PDF for the certificate of registration",
+                BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
+                IsPublic = true,
+                Values = new List<EvidenceValue>
+                {
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "CertificateOfRegistrationPdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
+                    }
+                }
+            };
+        }
+
+
         private async Task<List<EvidenceValue>> GetCertificateOfRegistration(string organization)
         {
             Product[] availableProducts;

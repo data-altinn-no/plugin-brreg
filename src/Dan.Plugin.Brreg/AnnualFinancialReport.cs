@@ -61,6 +61,28 @@ namespace Nadobe.EvidenceSources.ES_BR
             return await EvidenceSourceResponse.CreateResponse(req, ()=> GetAnnualFinancialReports(organization, numberOfYears));
         }
 
+        [Function("AnnualFinancialReportOpen")]
+        public async Task<HttpResponseData> AFROpen([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
+        {
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+
+            evidenceHarvesterRequest.TryGetParameter("NumberOfYears", out int numberOfYears);
+
+            if (numberOfYears < MIN_YEARS)
+            {
+                numberOfYears = MIN_YEARS;
+            }
+            else if (numberOfYears > MAX_YEARS)
+            {
+                numberOfYears = MAX_YEARS;
+            }
+
+            var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
+
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReports(organization, numberOfYears));
+        }
+
         [Function("Aarsregnskap")]
         public async Task<HttpResponseData> RunAarsregnskapAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
         {
@@ -194,6 +216,90 @@ namespace Nadobe.EvidenceSources.ES_BR
                         {
                             AccreditationPartyRequirementType.RequestorAndOwnerAreEqual
                         }
+                    }
+                }
+            };
+        }
+
+        public static EvidenceCode GetDefinitionOpen()
+        {
+            return new EvidenceCode
+            {
+                EvidenceCodeName = "AnnualFinancialReportOpen",
+                Description = "Code for retrieving URLs to PDFs for annual financial reports (1-5 years) synchronously",
+                IsAsynchronous = false,
+                BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
+                IsPublic = true,
+                Parameters = new List<EvidenceParameter>
+                {
+                    new EvidenceParameter
+                    {
+                        EvidenceParamName = "NumberOfYears",
+                        ParamType = EvidenceParamType.Number,
+                        Required = true
+                    }
+                },
+                Values = new List<EvidenceValue>
+                {
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year1",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year1PdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year2",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year2PdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year3",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year3PdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year4",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year4PdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year5",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "Year5PdfUrl",
+                        ValueType = EvidenceValueType.Uri,
+                        Source = Constants.SourceEnhetsregisteret
                     }
                 }
             };
