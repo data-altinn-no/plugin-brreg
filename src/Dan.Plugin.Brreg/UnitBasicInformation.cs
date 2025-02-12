@@ -264,6 +264,36 @@ namespace Nadobe.EvidenceSources.ES_BR
                         EvidenceValueName = "CreatedInNonProfitRegistry",
                         ValueType = EvidenceValueType.DateTime,
                         Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "HomePage",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "Email",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "SectorCode",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "SectorCodeDescription",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "Activity",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
@@ -319,11 +349,38 @@ namespace Nadobe.EvidenceSources.ES_BR
             bool? isBeingDissolved = null;
             bool? isUnderBankruptcy = null;
             bool? isBeingForciblyDissolved = null;
-            bool? isRegisteredVoluntaryOrg = null; 
+            bool? isRegisteredVoluntaryOrg = null;
+            string homePage = string.Empty;
+            string email = string.Empty;
+            string sectorCode = string.Empty;
+            string sectorCodeDescription = string.Empty;
+            string activity = string.Empty;
+
 
             long organizationNumber = result["organisasjonsnummer"];
             string organizationName = result["navn"];
             string organizationForm = result["organisasjonsform"]["kode"];
+
+            if (result["institusjonellSektorkode"]["kode"] != null)
+            {
+                sectorCode = result["institusjonellSektorkode"]["kode"];
+                sectorCodeDescription = result["institusjonellSektorkode"]["beskrivelse"];
+            }
+
+            if (result["aktivitet"] != null)
+            {
+                activity = string.Join(',', result["aktivitet"]);
+            }
+
+            if (result["hjemmeside"] != null)
+            {
+                homePage = result["hjemmeside"];
+            }
+
+            if (result["epostadresse"] != null)
+            {
+                email = result["epostadresse"];
+            }
 
             if (result["naeringskode1"] != null)
             {
@@ -449,6 +506,15 @@ namespace Nadobe.EvidenceSources.ES_BR
             ecb.AddEvidenceValue("OrganizationForm", organizationForm);
             ecb.AddEvidenceValue("IsInRegistryOfNonProfitOrganizations", isRegisteredVoluntaryOrg);
 
+            if (homePage != string.Empty)
+            {
+                ecb.AddEvidenceValue("HomePage", homePage);
+            }
+            if (email != string.Empty)
+            {
+                ecb.AddEvidenceValue("Email", email);
+            }
+
             if (createdInNonProfitRegistry != null)
             {
                 ecb.AddEvidenceValue("CreatedInNonProfitRegistry", createdInNonProfitRegistry.Value);
@@ -563,6 +629,19 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 ecb.AddEvidenceValue("IsBeingForciblyDissolved", isBeingForciblyDissolved.Value);
             }
+
+            if (sectorCode != string.Empty)
+            {
+                ecb.AddEvidenceValue("SectorCode", sectorCode);
+                ecb.AddEvidenceValue("SectorCodeDescription", sectorCodeDescription);
+            }
+
+            if (activity != string.Empty)
+            {
+                ecb.AddEvidenceValue("Activity", activity);
+            }
+
+
 
             return ecb.GetEvidenceValues();
         }
