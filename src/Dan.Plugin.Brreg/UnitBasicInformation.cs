@@ -252,6 +252,18 @@ namespace Nadobe.EvidenceSources.ES_BR
                         EvidenceValueName = "IsBeingForciblyDissolved",
                         ValueType = EvidenceValueType.Boolean,
                         Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "IsInRegistryOfNonProfitOrganizations",
+                        ValueType = EvidenceValueType.Boolean,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "CreatedInNonProfitRegistry",
+                        ValueType = EvidenceValueType.DateTime,
+                        Source = Constants.SourceEnhetsregisteret
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
@@ -299,6 +311,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             string businessAddressCity = string.Empty;
             DateTime? createdInCentralRegisterForLegalEntities = null;
             DateTime? established = null;
+            DateTime? createdInNonProfitRegistry = null;
             bool? isInRegisterOfBusinessEnterprises = null;
             bool? isInValueAddedTaxRegister = null;
             long? latestFinacialStatement = null;
@@ -306,6 +319,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             bool? isBeingDissolved = null;
             bool? isUnderBankruptcy = null;
             bool? isBeingForciblyDissolved = null;
+            bool? isRegisteredVoluntaryOrg = null; 
 
             long organizationNumber = result["organisasjonsnummer"];
             string organizationName = result["navn"];
@@ -316,6 +330,19 @@ namespace Nadobe.EvidenceSources.ES_BR
                 industryCode1 = result["naeringskode1"]["kode"];
                 industryCode1Description = result["naeringskode1"]["beskrivelse"];
             }
+
+            if (result["registrertIFrivillighetsregisteret"] != null)
+            {
+                isRegisteredVoluntaryOrg = (bool)result["registrertIFrivillighetsregisteret"];
+            } else
+            {
+                isRegisteredVoluntaryOrg = false;
+            }
+
+            if (result["registreringsdatoFrivillighetsregisteret"] != null)
+            {
+                createdInNonProfitRegistry = Convert.ToDateTime(result["registreringsdatoFrivillighetsregisteret"]);
+            } 
 
             if (result["naeringskode2"] != null)
             {
@@ -420,6 +447,12 @@ namespace Nadobe.EvidenceSources.ES_BR
             ecb.AddEvidenceValue("OrganizationNumber", organizationNumber);
             ecb.AddEvidenceValue("OrganizationName", organizationName);
             ecb.AddEvidenceValue("OrganizationForm", organizationForm);
+            ecb.AddEvidenceValue("IsInRegistryOfNonProfitOrganizations", isRegisteredVoluntaryOrg);
+
+            if (createdInNonProfitRegistry != null)
+            {
+                ecb.AddEvidenceValue("CreatedInNonProfitRegistry", createdInNonProfitRegistry.Value);
+            }
 
             if (industryCode1 != string.Empty)
             {

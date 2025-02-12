@@ -66,21 +66,9 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-
-            evidenceHarvesterRequest.TryGetParameter("NumberOfYears", out int numberOfYears);
-
-            if (numberOfYears < MIN_YEARS)
-            {
-                numberOfYears = MIN_YEARS;
-            }
-            else if (numberOfYears > MAX_YEARS)
-            {
-                numberOfYears = MAX_YEARS;
-            }
-
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReports(organization, numberOfYears));
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReports(organization, 3));
         }
 
         [Function("Aarsregnskap")]
