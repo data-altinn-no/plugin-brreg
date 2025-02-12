@@ -39,7 +39,7 @@ namespace ES_BR
         {
             _logger = context.GetLogger(context.FunctionDefinition.Name);
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
             evidenceHarvesterRequest.TryGetParameter("Aar", out int aar);
             evidenceHarvesterRequest.TryGetParameter("Type", out string type);
             return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, aar, type));
@@ -50,10 +50,8 @@ namespace ES_BR
         {
             _logger = context.GetLogger(context.FunctionDefinition.Name);
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            evidenceHarvesterRequest.TryGetParameter("Aar", out int aar);
-            evidenceHarvesterRequest.TryGetParameter("Type", out string type);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, aar, type));
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, DateTime.Now.Year-1, "SELSKAP"));
         }
 
         [Function("RegnskapsregisteretId")]
