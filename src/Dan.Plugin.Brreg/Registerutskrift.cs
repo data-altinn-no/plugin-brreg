@@ -63,7 +63,7 @@ namespace Dan.Plugin.Brreg {
         {
             return new EvidenceCode()
             {
-                EvidenceCodeName = nameof(CertificateOfRegistration),
+                EvidenceCodeName = nameof(Registerutskrift),
                 Description = "Provides a URL to a PDF for the certificate of registration",
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 IsPublic = true,
