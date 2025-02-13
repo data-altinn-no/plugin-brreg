@@ -57,7 +57,9 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 //Losore.GetDefinitionRettsstiftelserPerson(),
                 Losore.GetDefinitionRettsstiftelserVirksomhet(),
                 Stotteregisteret.GetDefinition(),
-                Tilskuddsregisteret.GetDefinition()
+                Tilskuddsregisteret.GetDefinition(),
+                Registerutskrift.GetDefinition(),
+                Losore.GetDefinitionRettsstiftelserVirksomhetOpen()
             };
         }
     }

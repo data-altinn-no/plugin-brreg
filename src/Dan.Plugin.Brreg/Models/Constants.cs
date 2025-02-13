@@ -33,5 +33,7 @@ namespace Dan.Plugin.Brreg.Models
         public static string SourceStotteRegisteret = "Støtteregisteret";
 
         public const string SourceTilskuddsregisteret = "Tilskudd.no";
+
+        public static int ERROR_CERTIFICATE_NOT_AVAILABLE = 15;
     }
 }

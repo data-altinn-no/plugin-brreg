@@ -54,6 +54,15 @@ namespace Dan.Plugin.Brreg
                 () => GetRettsstiftelserValuesVirksomhet(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
 
+        [Function("RettsstiftelserVirksomhetOpen")]
+        public async Task<HttpResponseData> GetRettsstiftelserVirksomhetOpen([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+        {
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);           
+            return await EvidenceSourceResponse.CreateResponse(req,
+                () => GetRettsstiftelserValuesVirksomhet(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
+        }
+
         private async Task<List<EvidenceValue>> GetRettsstiftelserValuesVirksomhet(string norwegianOrganizationNumber)
         {
             var url = _settings.LosoreURI + $"/api/v2/rettsstiftelse/orgnr/{norwegianOrganizationNumber}";
@@ -188,6 +197,29 @@ namespace Dan.Plugin.Brreg
                             new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Subject,
                                 PartyTypeConstraint.PrivateEnterprise)
                         }
+                    }
+                }
+            };
+        }
+
+        public static EvidenceCode GetDefinitionRettsstiftelserVirksomhetOpen()
+        {
+            return new EvidenceCode()
+            {
+                EvidenceCodeName = "RettsstiftelserVirksomhetOpen",
+                BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
+                Description = "",
+                IsPublic = true,
+                EvidenceSource = "Brreg",
+                Values = new List<EvidenceValue>()
+                {
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "default",
+                        Source = Constants.SourceLosoreregisteret,
+                        ValueType = EvidenceValueType.JsonSchema,
+                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
+                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
                     }
                 }
             };
