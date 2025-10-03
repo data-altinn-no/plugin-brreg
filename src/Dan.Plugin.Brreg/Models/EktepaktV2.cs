@@ -51,7 +51,7 @@ namespace Dan.Plugin.Brreg.Models.EktepaktV2
     public class Navn
     {
         public string fornavn { get; set; }
-        public object mellomnavn { get; set; }
+        public string? mellomnavn { get; set; }
         public string etternavn { get; set; }
     }
 
