@@ -30,8 +30,8 @@ namespace Nadobe.EvidenceSources.ES_BR
 {
 
     /// <summary>
-    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source. 
-    /// </summary>   
+    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source.
+    /// </summary>
     public class Ektepakt
     {
         private HttpClient _maskinportenClient;
@@ -83,7 +83,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             return ecb.GetEvidenceValues();
         }
 
-        private EktepaktResponse MapEktepaktDD(EktepaktV2 input)
+        public EktepaktResponse MapEktepaktDD(EktepaktV2 input)
         {
             var response = new EktepaktResponse()
             {
@@ -94,7 +94,12 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 var item = new EktepaktModel()
                 {
-                    SpouseName = a.rolle[1].person.navn.fornavn + " " + a.rolle[1].person.navn.etternavn,
+                    SpouseName = a.rolle[1].person.navn.fornavn + " "
+                                //middlename if there is one
+                                + (string.IsNullOrEmpty(a.rolle[1].person.navn.mellomnavn)
+                                ? ""
+                                : a.rolle[1].person.navn.mellomnavn + " ")
+                          + a.rolle[1].person.navn.etternavn,
                     EntryDate = a.innkomsttidspunkt
                 };
 
@@ -110,7 +115,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 EvidenceCodeName = "Ektepakt",
                 BelongsToServiceContexts = new List<string>() { Constants.DD },
-                Description = "List marriage settlements",               
+                Description = "List marriage settlements",
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
