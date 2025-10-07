@@ -30,12 +30,12 @@ namespace Dan.Plugin.Brreg.Test
         [InlineData("fornavn", null, "etternavn", "fornavn etternavn")]
         public void MappingEktepaktContainsMiddlename(string fornavn, string? mellomnavn, string etternavn, string expected)
         {
-            //Assert
+            // Arrange
             var ektepakter = new List<Ektepakt>
             {
                 new Ektepakt{
-                    rolle = new List<Rolle>
-                    {
+                    rolle =
+                    [
                         new Rolle(),
                         new Rolle
                         {
@@ -51,8 +51,7 @@ namespace Dan.Plugin.Brreg.Test
                             },
                             avtaleinnhold = null
                         }
-
-                    }.ToArray()
+                    ]
                 }
             };
             var input = new EktepaktV2
