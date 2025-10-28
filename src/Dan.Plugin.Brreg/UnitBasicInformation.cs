@@ -361,10 +361,13 @@ namespace Nadobe.EvidenceSources.ES_BR
             string organizationName = result["navn"];
             string organizationForm = result["organisasjonsform"]["kode"];
 
-            if (result["institusjonellSektorkode"]["kode"] != null)
+            if (result["institusjonellSektorkode"] != null)
             {
-                sectorCode = result["institusjonellSektorkode"]["kode"];
-                sectorCodeDescription = result["institusjonellSektorkode"]["beskrivelse"];
+                if (result["institusjonellSektorkode"]["kode"] != null)
+                {
+                    sectorCode = result["institusjonellSektorkode"]["kode"];
+                    sectorCodeDescription = result["institusjonellSektorkode"]["beskrivelse"];
+                }               
             }
 
             if (result["aktivitet"] != null)
