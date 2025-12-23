@@ -1,28 +1,29 @@
 using System.Collections.Generic;
-using AwesomeAssertions;
 using System.Net.Http;
+using AwesomeAssertions;
 using Dan.Common.Interfaces;
 using Dan.Plugin.Brreg.Config;
 using Dan.Plugin.Brreg.Models.EktepaktV2;
+using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Moq;
 using Xunit;
+using Ektepakt = Nadobe.EvidenceSources.ES_BR.Ektepakt;
 
 namespace Dan.Plugin.Brreg.Test
 {
     public class EktepaktTest
     {
-        private Nadobe.EvidenceSources.ES_BR.Ektepakt _ektepakt;
+        private Ektepakt _ektepakt;
 
         public EktepaktTest()
         {
-            var client = new Mock<IHttpClientFactory>();
-            Mock<IOptions<Settings>> settingsOptions = new();
-            Mock<ILoggerFactory> loggerFactoryMock = new();
-            Mock<IEvidenceSourceMetadata> metadata = new();
+            var client = A.Fake<IHttpClientFactory>();
+            IOptions<Settings> settingsOptions = A.Fake<IOptions<Settings>>();
+            ILoggerFactory loggerFactoryMock = A.Fake<ILoggerFactory>();
+            IEvidenceSourceMetadata metadata = A.Fake<IEvidenceSourceMetadata>();
 
-            _ektepakt = new(client.Object, settingsOptions.Object, metadata.Object, loggerFactoryMock.Object);
+            _ektepakt = new(client, settingsOptions, metadata, loggerFactoryMock);
         }
 
         [Theory]
@@ -31,9 +32,9 @@ namespace Dan.Plugin.Brreg.Test
         public void MappingEktepaktContainsMiddlename(string fornavn, string? mellomnavn, string etternavn, string expected)
         {
             // Arrange
-            var ektepakter = new List<Ektepakt>
+            var ektepakter = new List<Models.EktepaktV2.Ektepakt>
             {
-                new Ektepakt{
+                new Models.EktepaktV2.Ektepakt{
                     rolle =
                     [
                         new Rolle(),
