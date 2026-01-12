@@ -23,8 +23,8 @@ namespace Nadobe.EvidenceSources.ES_BR
     using System.Threading.Tasks;
 
     /// <summary>
-    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source. 
-    /// </summary>   
+    /// This class implements the Azure Function entry points for all the functions implemented by this evidence source.
+    /// </summary>
     public class UnitBasicInformation
     {
         public HttpClient _client;
@@ -75,7 +75,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 EvidenceCodeName = "UnitBasicInformation",
                 Description = "Return units basic information for the subject company",
-                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV, Constants.ALTINNSTUDIOAPPS },
                 IsPublic = true,
                 Values = new List<EvidenceValue>
                 {
@@ -367,7 +367,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 {
                     sectorCode = result["institusjonellSektorkode"]["kode"];
                     sectorCodeDescription = result["institusjonellSektorkode"]["beskrivelse"];
-                }               
+                }
             }
 
             if (result["aktivitet"] != null)
@@ -402,7 +402,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             if (result["registreringsdatoFrivillighetsregisteret"] != null)
             {
                 createdInNonProfitRegistry = Convert.ToDateTime(result["registreringsdatoFrivillighetsregisteret"]);
-            } 
+            }
 
             if (result["naeringskode2"] != null)
             {
