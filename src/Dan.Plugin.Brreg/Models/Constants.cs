@@ -30,7 +30,7 @@ namespace Dan.Plugin.Brreg.Models
         public const string EDUEDILIGENCE = "eDueDiligence";
         public const string DD = "OED";
         public const string DIGOKFRIV = "Digøk-friv";
-        public const string ALTINNSTUDIOAPPS = "Altinn-Studio-Apps";
+        public const string ALTINNSTUDIOAPPS = "Altinn Studio-apps";
 
         public static string SourceStotteRegisteret = "Støtteregisteret";
 
