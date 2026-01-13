@@ -295,16 +295,6 @@ namespace Nadobe.EvidenceSources.ES_BR
                         ValueType = EvidenceValueType.String,
                         Source = Constants.SourceEnhetsregisteret
                     }
-                },
-                AuthorizationRequirements = new List<Requirement>()
-                {
-                    new PartyTypeRequirement()
-                    {
-                        AllowedPartyTypes = new AllowedPartyTypesList()
-                        {
-                            new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor,PartyTypeConstraint.PublicAgency)
-                        }
-                    }
                 }
             };
         }
