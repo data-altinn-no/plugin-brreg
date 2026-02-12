@@ -18,6 +18,7 @@ namespace Nadobe.EvidenceSources.ES_BR
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -62,7 +63,42 @@ namespace Nadobe.EvidenceSources.ES_BR
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
             return await EvidenceSourceResponse.CreateResponse(req, () => GetUnitBasicInformationFromBrreg(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, _client));
+        }
 
+        /// <summary>
+        /// Function entry point: unit basic information for the organization
+        /// </summary>
+        /// <param name="req">
+        /// The HTTP request.
+        /// </param>
+        /// <param name="log">
+        /// The logging object.
+        /// </param>
+        /// <param name="client">
+        /// The HTTP client.
+        /// </param>
+        /// <returns>
+        /// A <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        [Function("Virksomhetsinformasjon")]
+        public async Task<HttpResponseData> Virksomhetsinformasjon([HttpTrigger(AuthorizationLevel.Function, "post")]
+            HttpRequestData req, FunctionContext context)
+        {
+            _logger = context.GetLogger(context.FunctionDefinition.Name);
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetVirksomhetsinformasjonValues(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, _client));
+        }
+
+        private async Task<List<EvidenceValue>> GetVirksomhetsinformasjonValues(string norwegianOrganizationNumber, HttpClient client)
+        {
+            var unitbasic = await GetUnitBasicInformationFromBrreg(norwegianOrganizationNumber, client);
+
+            var ecb = new EvidenceBuilder(_metadata, "Virksomhetsinformasjon");
+            ecb.AddEvidenceValue("navn", unitbasic.FirstOrDefault(x=>x.EvidenceValueName == "OrganizationName").Value.ToString(), Constants.SourceEnhetsregisteret, false);
+            ecb.AddEvidenceValue("organisasjonsnummer", norwegianOrganizationNumber, Constants.SourceEnhetsregisteret, false);
+
+            return ecb.GetEvidenceValues();
         }
 
         /// <summary>
@@ -668,6 +704,32 @@ namespace Nadobe.EvidenceSources.ES_BR
             }
 
             return result;
+        }
+
+        public static EvidenceCode GetDefinitionVirksomhetsinformasjon()
+        {
+            return new EvidenceCode()
+            {
+                EvidenceCodeName = "Virksomhetsinformasjon",
+                Description = "Return information about the subject company",
+                BelongsToServiceContexts = new List<string>() { Constants.DD },
+                IsPublic = false,
+                Values = new List<EvidenceValue>
+                {
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "navn",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    },
+                    new EvidenceValue()
+                    {
+                        EvidenceValueName = "organisasjonsnummer",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceEnhetsregisteret
+                    }
+                }
+            };
         }
     }
 }

@@ -60,7 +60,8 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 Tilskuddsregisteret.GetDefinition(),
                 Registerutskrift.GetDefinition(),
                 Losore.GetDefinitionRettsstiftelserVirksomhetOpen(),
-                Frivillighetsregisteret.GetDefinitionFrivilligOrganisation()
+                Frivillighetsregisteret.GetDefinitionFrivilligOrganisation(),
+                UnitBasicInformation.GetDefinitionVirksomhetsinformasjon(),
             };
         }
     }

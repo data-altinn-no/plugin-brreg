@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Dan.Plugin.Brreg": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7075"
+    }
+  }
+}
