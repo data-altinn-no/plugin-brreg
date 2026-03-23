@@ -42,14 +42,14 @@ namespace Nadobe.EvidenceSources.ES_BR {
             return new List<EvidenceCode>
             {
                 CertificateOfRegistration.GetDefinition(),
-                CertificateOfRegistration.GetDefinitionOpen(),
+                //CertificateOfRegistration.GetDefinitionOpen(),
                 AnnualFinancialReport.GetDefinition(),
-                AnnualFinancialReport.GetDefinitionOpen(),
+                //AnnualFinancialReport.GetDefinitionOpen(),
                 UnitBasicInformation.GetDefinition(),              
                 Konkurs.GetDefinition(),               
                 Regnskapsregisteret.GetDefinitionRegnskap(),
                 Regnskapsregisteret.GetDefinitionRegnskapId(),
-                Regnskapsregisteret.GetDefinitionRegnskapOpen(),
+                //Regnskapsregisteret.GetDefinitionRegnskapOpen(),
                 Roller.GetDefinition(),
                 Kunngjoringer.GetDefinition(),
                 Ektepakt.GetDefinitionEktepaktV2(),
@@ -59,7 +59,7 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 Stotteregisteret.GetDefinition(),
                 Tilskuddsregisteret.GetDefinition(),
                 Registerutskrift.GetDefinition(),
-                Losore.GetDefinitionRettsstiftelserVirksomhetOpen(),
+                //Losore.GetDefinitionRettsstiftelserVirksomhetOpen(),
                 Frivillighetsregisteret.GetDefinitionFrivilligOrganisation(),
                 UnitBasicInformation.GetDefinitionVirksomhetsinformasjon(),
             };
