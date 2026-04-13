@@ -64,7 +64,7 @@ namespace Dan.Plugin.Brreg.Test
             var mapped = _ektepakt.MapEktepaktDD(input);
 
             //Assert
-            mapped.Ektepakter[0].SpouseName.Should().Be(expected);
+            mapped.Ektepakter[0].SpouseNames.Should().Contain(expected);
         }
     }
 }

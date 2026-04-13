@@ -6,7 +6,7 @@ namespace Dan.Plugin.Brreg.Models
 {
     public class EktepaktModel
     {
-        public string SpouseName { get; set; }
+        public List<string> SpouseNames { get; set; }
 
         public DateTime? EntryDate { get; set; }
     }

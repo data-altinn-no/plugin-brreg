@@ -88,18 +88,29 @@ namespace Nadobe.EvidenceSources.ES_BR
             var response = new EktepaktResponse()
             {
                 Ektepakter = new List<EktepaktModel>()
-            };
-
+            };                       
+            
             foreach (var a in input.ektepakt)
             {
+                var spouseNames = new List<string>();
+
+                // Collect names for all roles that have a person name
+                foreach (var rolle in a.rolle)
+                {
+                    if (rolle?.person?.navn != null)
+                    {
+                        var name = rolle.person.navn.fornavn + " "
+                                   + (string.IsNullOrEmpty(rolle.person.navn.mellomnavn)
+                                       ? ""
+                                       : rolle.person.navn.mellomnavn + " ")
+                                   + rolle.person.navn.etternavn;
+                        spouseNames.Add(name);
+                    }
+                }
+
                 var item = new EktepaktModel()
                 {
-                    SpouseName = a.rolle[1].person.navn.fornavn + " "
-                                //middlename if there is one
-                                + (string.IsNullOrEmpty(a.rolle[1].person.navn.mellomnavn)
-                                ? ""
-                                : a.rolle[1].person.navn.mellomnavn + " ")
-                          + a.rolle[1].person.navn.etternavn,
+                    SpouseNames = spouseNames,
                     EntryDate = a.innkomsttidspunkt
                 };
 
