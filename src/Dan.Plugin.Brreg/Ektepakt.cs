@@ -88,15 +88,13 @@ namespace Nadobe.EvidenceSources.ES_BR
             var response = new EktepaktResponse()
             {
                 Ektepakter = new List<EktepaktModel>()
-            };
-            
-            
+            };                       
             
             foreach (var a in input.ektepakt)
             {
                 var spouseNames = new List<string>();
 
-                // Collect all spouse names from all roles
+                // Collect names for all roles that have a person name
                 foreach (var rolle in a.rolle)
                 {
                     if (rolle?.person?.navn != null)
