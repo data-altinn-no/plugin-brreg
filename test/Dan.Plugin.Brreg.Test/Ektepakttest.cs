@@ -37,7 +37,6 @@ namespace Dan.Plugin.Brreg.Test
                 new Models.EktepaktV2.Ektepakt{
                     rolle =
                     [
-                        new Rolle(),
                         new Rolle
                         {
                             person = new Person()
