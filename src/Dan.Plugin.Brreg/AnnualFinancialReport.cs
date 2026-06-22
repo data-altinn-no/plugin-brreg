@@ -205,22 +205,12 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/aar";
 
-            List<string> availableYears;
-            try
-            {
-                var response = await Requests.MakeRequest(url, _client,
-                    _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw,
-                    HttpMethod.Get, _logger);
-
-                availableYears = JsonConvert.DeserializeObject<List<string>>(
-                    JsonConvert.SerializeObject(response));
-            }
-            catch
-            {
-                throw new EvidenceSourcePermanentClientException(
-                    Constants.ERROR_NO_REPORT_AVAILABLE,
-                    $"No financial reports are available for {organization}");
-            }
+            var response = await Requests.MakeRequest(url, _client,
+            _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw,
+            HttpMethod.Get, _logger);
+            
+            var availableYears = JsonConvert.DeserializeObject<List<string>>(
+            JsonConvert.SerializeObject(response));
 
             if (availableYears == null || !availableYears.Any())
             {
