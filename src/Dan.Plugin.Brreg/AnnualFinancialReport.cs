@@ -206,11 +206,11 @@ namespace Nadobe.EvidenceSources.ES_BR
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/aar";
 
             var response = await Requests.MakeRequest(url, _client,
-            _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw,
-            HttpMethod.Get, _logger);
-            
-            var availableYears = JsonConvert.DeserializeObject<List<string>>(
-            JsonConvert.SerializeObject(response));
+                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw,
+                HttpMethod.Get, _logger);
+
+            List<string> availableYears = JsonConvert.DeserializeObject<List<string>>(
+                    JsonConvert.SerializeObject(response));            
 
             if (availableYears == null || !availableYears.Any())
             {
