@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Dan.Plugin.Brreg.Config;
 using Microsoft.Azure.Functions.Worker;
@@ -83,6 +86,45 @@ namespace Nadobe.EvidenceSources.ES_BR
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
             return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReports(organization, numberOfYears));
+        }
+
+        [Function("AnnualFinancialReportPdf")]
+        public async Task<HttpResponseData> RunPdfAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
+        {
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
+
+            evidenceHarvesterRequest.TryGetParameter("Year", out string year);
+
+            var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
+
+            string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            requestMessage.Headers.Accept.Clear();
+            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+            if (!string.IsNullOrEmpty(_settings.RegnskapsregisteretUsername))
+            {
+                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_settings.RegnskapsregisteretUsername}:{_settings.RegnskapsregisteretPw}"));
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
+            }
+
+            var apiResponse = await _client.SendAsync(requestMessage);
+
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                throw new EvidenceSourcePermanentClientException(
+                    Constants.ERROR_NO_REPORT_AVAILABLE,
+                    $"No PDF available for {organization} year {year}");
+            }
+
+            var pdfBytes = await apiResponse.Content.ReadAsByteArrayAsync();
+
+            var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Content-Type", "application/pdf");
+            await response.Body.WriteAsync(pdfBytes);
+            return response;
         }
 
         /// <summary>
@@ -199,6 +241,93 @@ namespace Nadobe.EvidenceSources.ES_BR
                     }
                 }
             };
+        }
+        
+        public static EvidenceCode GetDefinitionPdf()
+        {
+            return new EvidenceCode
+            {
+                EvidenceCodeName = "AnnualFinancialReportPdf",
+                Description = "Returns the PDF for an annual financial report for a given year",
+                IsAsynchronous = false,
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
+                Parameters = new List<EvidenceParameter>
+                {
+                    new EvidenceParameter
+                    {
+                        EvidenceParamName = "Year",
+                        ParamType = EvidenceParamType.String,
+                        Required = true
+                    }
+                },
+                Values = new List<EvidenceValue>
+                {
+                    new EvidenceValue
+                    {
+                        EvidenceValueName = "pdf",
+                        ValueType = EvidenceValueType.String,
+                        Source = Constants.SourceRegnskapsregisteret
+                    }
+                },
+                AuthorizationRequirements = new List<Requirement>()
+                {
+                    new PartyTypeRequirement()
+                    {
+                        AppliesToServiceContext = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE },
+                        AllowedPartyTypes = new AllowedPartyTypesList()
+                        {
+                            new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor, PartyTypeConstraint.PublicAgency)
+                        }
+                    },
+                    new PartyTypeRequirement()
+                    {
+                        AppliesToServiceContext = new List<string>() { Constants.SERIOSITET },
+                        AllowedPartyTypes = new AllowedPartyTypesList()
+                        {
+                            new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Requestor, PartyTypeConstraint.PrivateEnterprise)
+                        }
+                    },
+                    new AccreditationPartyRequirement()
+                    {
+                        AppliesToServiceContext = new List<string>() { Constants.EDUEDILIGENCE, Constants.SERIOSITET },
+                        PartyRequirements = new List<AccreditationPartyRequirementType>()
+                        {
+                            AccreditationPartyRequirementType.RequestorAndOwnerAreEqual
+                        }
+                    }
+                }
+            };
+        }
+
+        private async Task<List<EvidenceValue>> GetAnnualFinancialReportPdf(string organization, string year)
+        {
+            string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            requestMessage.Headers.Accept.Clear();
+            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+            if (!string.IsNullOrEmpty(_settings.RegnskapsregisteretUsername))
+            {
+                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_settings.RegnskapsregisteretUsername}:{_settings.RegnskapsregisteretPw}"));
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
+            }
+
+            var response = await _client.SendAsync(requestMessage);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new EvidenceSourcePermanentClientException(
+                    Constants.ERROR_NO_REPORT_AVAILABLE,
+                    $"No PDF available for {organization} year {year}");
+            }
+
+            var pdfBytes = await response.Content.ReadAsByteArrayAsync();
+
+            var eb = new EvidenceBuilder(_metadata, "AnnualFinancialReportPdf");
+            eb.AddEvidenceValue("pdf", Convert.ToBase64String(pdfBytes), Constants.SourceRegnskapsregisteret, false);
+
+            return eb.GetEvidenceValues();
         }
 
         private async Task<List<EvidenceValue>> GetAnnualFinancialReports(string organization, int numberOfYears)

@@ -43,6 +43,7 @@ namespace Nadobe.EvidenceSources.ES_BR {
             {
                 CertificateOfRegistration.GetDefinition(),
                 AnnualFinancialReport.GetDefinition(),
+                AnnualFinancialReport.GetDefinitionPdf(),
                 UnitBasicInformation.GetDefinition(),
                 Konkurs.GetDefinition(),
                 Regnskapsregisteret.GetDefinitionRegnskap(),
@@ -51,7 +52,6 @@ namespace Nadobe.EvidenceSources.ES_BR {
                 Kunngjoringer.GetDefinition(),
                 Ektepakt.GetDefinitionEktepaktV2(),
                 Losore.GetDefinitionRettsstiftelserKjoretoy(),
-                //Losore.GetDefinitionRettsstiftelserPerson(),
                 Losore.GetDefinitionRettsstiftelserVirksomhet(),
                 Stotteregisteret.GetDefinition(),
                 Tilskuddsregisteret.GetDefinition(),
