@@ -96,6 +96,13 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             evidenceHarvesterRequest.TryGetParameter("Year", out string year);
 
+            if (string.IsNullOrEmpty(year) || !System.Text.RegularExpressions.Regex.IsMatch(year, @"^\d{4}$"))
+            {
+                throw new EvidenceSourcePermanentClientException(
+                    Constants.ERROR_NO_REPORT_AVAILABLE,
+                    "Year parameter is missing or invalid. Expected a 4-digit year.");
+            }
+
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
