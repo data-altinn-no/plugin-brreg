@@ -105,33 +105,7 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
-            string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
-
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Accept.Clear();
-            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
-
-            if (!string.IsNullOrEmpty(_settings.RegnskapsregisteretUsername))
-            {
-                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_settings.RegnskapsregisteretUsername}:{_settings.RegnskapsregisteretPw}"));
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
-            }
-
-            var apiResponse = await _client.SendAsync(requestMessage);
-
-            if (!apiResponse.IsSuccessStatusCode)
-            {
-                throw new EvidenceSourcePermanentClientException(
-                    Constants.ERROR_NO_REPORT_AVAILABLE,
-                    $"No PDF available for {organization} year {year}");
-            }
-
-            var pdfBytes = await apiResponse.Content.ReadAsByteArrayAsync();
-
-            var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "application/pdf");
-            await response.Body.WriteAsync(pdfBytes);
-            return response;
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReportPdf(organization, year));
         }
 
         /// <summary>
