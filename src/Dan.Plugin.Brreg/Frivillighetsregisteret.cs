@@ -63,6 +63,7 @@ namespace Dan.Plugin.Brreg
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 Description = $"Hente en organisasjon fra {Constants.SourceFrivillighetsregisteret}",
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 EvidenceSource = "Brreg",
                 Values = new List<EvidenceValue>()
                 {

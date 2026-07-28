@@ -23,7 +23,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dan.Plugin.Brreg.Helpers;
 using Dan.Plugin.Brreg.Models.EktepaktV2;
-using NJsonSchema;
 
 
 namespace Nadobe.EvidenceSources.ES_BR
@@ -146,7 +145,8 @@ namespace Nadobe.EvidenceSources.ES_BR
                         EvidenceValueName = "default",
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}"
+                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
+                        JsonSchemaDefintion = EvidenceValue.SchemaFromObject<EktepaktResponse>(Formatting.None)
                     }
                 }
             };
