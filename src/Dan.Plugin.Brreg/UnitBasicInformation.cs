@@ -113,6 +113,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 Description = "Return units basic information for the subject company",
                 BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV, Constants.ALTINNSTUDIOAPPS },
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()

@@ -67,6 +67,7 @@ namespace Dan.Plugin.Brreg {
                 Description = "Provides a URL to a PDF for the certificate of registration",
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 Values = new List<EvidenceValue>
                 {
                     new EvidenceValue()

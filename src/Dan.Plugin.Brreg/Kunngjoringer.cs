@@ -57,6 +57,7 @@ namespace Dan.Plugin.Brreg
                 EvidenceCodeName = "Kunngjoringer",
                 BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE, Constants.DIGOKFRIV },
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 Values = new List<EvidenceValue>()
                 {
                     new EvidenceValue()
