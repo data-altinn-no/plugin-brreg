@@ -45,15 +45,6 @@ namespace ES_BR
             return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, aar, type));
         }
 
-        [Function("RegnskapsregisteretOpen")]
-        public async Task<HttpResponseData> RRAccountsOpen([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
-        {
-            _logger = context.GetLogger(context.FunctionDefinition.Name);
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetRegnskap(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, DateTime.Now.Year-1, "SELSKAP"));
-        }
-
         [Function("RegnskapsregisteretId")]
         public async Task<HttpResponseData> RRById([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, FunctionContext context)
         {
@@ -158,30 +149,5 @@ namespace ES_BR
             };
         }
 
-        public static EvidenceCode GetDefinitionRegnskapOpen()
-        {
-
-            return new EvidenceCode()
-            {
-                EvidenceCodeName = "RegnskapsregisteretOpen",
-                Description = "The public accounts of an organization",
-                BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
-                IsPublic = true,
-                Values = new List<EvidenceValue>
-                {
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "default",
-                        ValueType = EvidenceValueType.JsonSchema,
-                        Source = Constants.SourceRegnskapsregisteret
-                    }
-                },                
-                Parameters = new List<EvidenceParameter>()
-                {
-                    new EvidenceParameter() { EvidenceParamName = "Aar", ParamType = EvidenceParamType.Number, Required = true },
-                    new EvidenceParameter() { EvidenceParamName = "Type", ParamType = EvidenceParamType.String, Required = true },
-                }
-            };
-        }
     }
 }
