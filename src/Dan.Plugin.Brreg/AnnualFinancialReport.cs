@@ -218,6 +218,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                 IsAsynchronous = false,
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 Parameters = new List<EvidenceParameter>
                 {
                     new EvidenceParameter

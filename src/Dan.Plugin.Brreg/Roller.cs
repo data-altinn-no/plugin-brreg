@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NJsonSchema;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -163,7 +162,7 @@ namespace Dan.Plugin.Brreg
                     {
                         EvidenceValueName = "default",
                         ValueType = EvidenceValueType.JsonSchema,
-                        JsonSchemaDefintion = JsonSchema.FromType<RollerResponse>().ToJson(Formatting.None),
+                        JsonSchemaDefintion = EvidenceValue.SchemaFromObject<RollerResponse>(Formatting.None),
                         Source = Constants.SourceEnhetsregisteret
                     }
                 },

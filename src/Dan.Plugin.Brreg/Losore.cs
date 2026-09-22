@@ -24,7 +24,6 @@ using Newtonsoft.Json;
 using Constants = Dan.Plugin.Brreg.Models.Constants;
 using StackExchange.Redis;
 using Azure;
-using NJsonSchema;
 
 namespace Dan.Plugin.Brreg
 {
@@ -135,7 +134,7 @@ namespace Dan.Plugin.Brreg
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
                         Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion =  JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None),
+                        JsonSchemaDefintion =  EvidenceValue.SchemaFromObject<LosoreV2>(Formatting.None),
                     }
                 },
                 Parameters = new List<EvidenceParameter>()
@@ -185,7 +184,7 @@ namespace Dan.Plugin.Brreg
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
                         Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
+                        JsonSchemaDefintion = EvidenceValue.SchemaFromObject<LosoreV2>(Formatting.None)
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
@@ -210,6 +209,7 @@ namespace Dan.Plugin.Brreg
                 BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
                 Description = "",
                 IsPublic = true,
+                License = "https://data.norge.no/nlod/no/2.0/",
                 EvidenceSource = "Brreg",
                 Values = new List<EvidenceValue>()
                 {
@@ -219,7 +219,7 @@ namespace Dan.Plugin.Brreg
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
                         Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
+                        JsonSchemaDefintion = EvidenceValue.SchemaFromObject<LosoreV2>(Formatting.None)
                     }
                 }
             };
@@ -240,7 +240,7 @@ namespace Dan.Plugin.Brreg
                         Source = Constants.SourceLosoreregisteret,
                         ValueType = EvidenceValueType.JsonSchema,
                         Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
+                        JsonSchemaDefintion = EvidenceValue.SchemaFromObject<LosoreV2>(Formatting.None)
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
