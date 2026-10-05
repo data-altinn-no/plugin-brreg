@@ -65,5 +65,42 @@ namespace Dan.Plugin.Brreg.Test
             //Assert
             mapped.Ektepakter[0].SpouseNames.Should().Contain(expected);
         }
+
+        [Fact]
+        public void MappingNullEktepaktArrayReturnsEmptyList()
+        {
+            // A 200 from the API with no "ektepakt" member deserialises to a null array
+            var input = new EktepaktV2
+            {
+                antallEktepakt = 0,
+                ektepakt = null
+            };
+
+            var mapped = _ektepakt.MapEktepaktDD(input);
+
+            mapped.Ektepakter.Should().NotBeNull().And.BeEmpty();
+        }
+
+        [Fact]
+        public void MappingEmptyEktepaktArrayReturnsEmptyList()
+        {
+            var input = new EktepaktV2
+            {
+                antallEktepakt = 0,
+                ektepakt = []
+            };
+
+            var mapped = _ektepakt.MapEktepaktDD(input);
+
+            mapped.Ektepakter.Should().NotBeNull().And.BeEmpty();
+        }
+
+        [Fact]
+        public void MappingNullInputReturnsEmptyList()
+        {
+            var mapped = _ektepakt.MapEktepaktDD(null);
+
+            mapped.Ektepakter.Should().NotBeNull().And.BeEmpty();
+        }
     }
 }

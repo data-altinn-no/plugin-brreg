@@ -74,9 +74,24 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             var url = _settings.EktepaktV2Uri + $"/api/v1/fnr/{identifier}?spraakkode=NOB";
 
-            var response = await Requests.GetData<EktepaktV2>(_maskinportenClient, url, _logger);
+            var response = await Requests.Send(_maskinportenClient, HttpMethod.Get, url, _logger);
 
-            var mappedObject = MapEktepaktDD(response);
+            EktepaktV2 ektepakt;
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                // The Ektepakt API documents only 200, 403 and 500. Should it ever answer 404, a subject unknown to
+                // the register has no ektepakt, which is a valid empty result rather than an error.
+                ektepakt = new EktepaktV2();
+            }
+            else
+            {
+                // 403 is the API's "subscriber authentication failed" and must surface as an auth error, not as
+                // "person not found" the way the shared GetData helper maps it.
+                Requests.EnsureSuccess(response, url, _logger);
+                ektepakt = JsonConvert.DeserializeObject<EktepaktV2>(await response.Content.ReadAsStringAsync());
+            }
+
+            var mappedObject = MapEktepaktDD(ektepakt);
 
             var ecb = new EvidenceBuilder(_metadata, "Ektepakt");
             ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(mappedObject), "Løsøreregisteret", false);
@@ -90,7 +105,9 @@ namespace Nadobe.EvidenceSources.ES_BR
                 Ektepakter = new List<EktepaktModel>()
             };                       
 
-            foreach (var a in input.ektepakt)
+            // A person with no ektepakt gets a 200 with no ektepakt array, which deserialises to null.
+            // That is a successful, empty answer: return the empty list instead of throwing.
+            foreach (var a in input?.ektepakt ?? [])
             {
                 var spouseNames = new List<string>();
 
