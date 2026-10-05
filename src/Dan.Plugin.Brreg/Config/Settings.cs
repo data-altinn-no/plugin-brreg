@@ -23,6 +23,8 @@ namespace Dan.Plugin.Brreg.Config
         public string EktepaktUri { get; set; }
 
         public string RegnskapsregisteretUri { get; set; }
+        public string RegnskapsregisteretPw { get; set; }
+        public string RegnskapsregisteretUsername { get; set; }
 
         public string AnnouncementUrl { get; set; }
         public string StotteregisterUrl { get; set; }

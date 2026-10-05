@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Dan.Plugin.Brreg.Models;
 
@@ -14,14 +16,15 @@ namespace Dan.Plugin.Brreg.Helpers
     public static class Requests
     {
 
-        public static async Task<dynamic> MakeRequest(string url, HttpClient client, HttpMethod method, ILogger logger)
+        public static async Task<dynamic> MakeRequest(string url, HttpClient client, string username, string password, HttpMethod method, ILogger logger)
         {
             string rawResult;
             dynamic result;
             
             try
             {
-                var response = await client.SendAsync(new HttpRequestMessage(method, url));
+                var requestMessage = BuildRequest(method, url, username, password);
+                var response = await client.SendAsync(requestMessage);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -70,8 +73,22 @@ namespace Dan.Plugin.Brreg.Helpers
         }
 
 
+        private static HttpRequestMessage BuildRequest(HttpMethod method, string url, string username, string password)
+        {
+            var requestMessage = new HttpRequestMessage(method, url);
+
+            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            {
+                var authenticationString = $"{username}:{password}";
+                var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(authenticationString));
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
+            }
+
+            return requestMessage;
+        }
+
         /// <summary>
-        /// Sends a request and returns the raw response. Pass <see cref="HttpCompletionOption.ResponseHeadersRead"/> to stream a large body.
+        /// Sends an unauthenticated request and returns the raw response. Pass <see cref="HttpCompletionOption.ResponseHeadersRead"/> to stream a large body.
         /// Network failures and timeouts are reported as transient upstream errors; the caller decides how to treat the status code,
         /// typically by handling 404 itself and passing everything else to <see cref="EnsureSuccess"/>.
         /// </summary>
