@@ -54,15 +54,6 @@ namespace Dan.Plugin.Brreg
                 () => GetRettsstiftelserValuesVirksomhet(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
 
-        [Function("RettsstiftelserVirksomhetOpen")]
-        public async Task<HttpResponseData> GetRettsstiftelserVirksomhetOpen([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
-        {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);           
-            return await EvidenceSourceResponse.CreateResponse(req,
-                () => GetRettsstiftelserValuesVirksomhet(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
-        }
-
         private async Task<List<EvidenceValue>> GetRettsstiftelserValuesVirksomhet(string norwegianOrganizationNumber)
         {
             var url = _settings.LosoreURI + $"/api/v2/rettsstiftelse/orgnr/{norwegianOrganizationNumber}";
@@ -93,25 +84,6 @@ namespace Dan.Plugin.Brreg
             }
 
             var url = _settings.LosoreURI + $"/api/v2/rettsstiftelse/regnr/{regnr}";
-            var response = await Requests.GetData<LosoreV2>(_maskinportenClient, url, _logger);
-
-            var ecb = new EvidenceBuilder(_metadata, "RettsstiftelserKjoretoy");
-            ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(response), "Løsøreregisteret", false);
-            return ecb.GetEvidenceValues();
-        }
-
-        [Function("RettsstiftelserPerson")]
-        public async Task<HttpResponseData> GetRettsstiftelserPerson([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
-        {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req,
-                () => GetRettsstiftelserValuesPerson(evidenceHarvesterRequest.SubjectParty.NorwegianSocialSecurityNumber));
-        }
-
-        private async Task<List<EvidenceValue>> GetRettsstiftelserValuesPerson(string norwegianSocialSecurityNumber)
-        {
-            var url = _settings.LosoreURI + $"/api/v2/rettsstiftelse/fnr/{norwegianSocialSecurityNumber}";
             var response = await Requests.GetData<LosoreV2>(_maskinportenClient, url, _logger);
 
             var ecb = new EvidenceBuilder(_metadata, "RettsstiftelserKjoretoy");
@@ -202,58 +174,5 @@ namespace Dan.Plugin.Brreg
             };
         }
 
-        public static EvidenceCode GetDefinitionRettsstiftelserVirksomhetOpen()
-        {
-            return new EvidenceCode()
-            {
-                EvidenceCodeName = "RettsstiftelserVirksomhetOpen",
-                BelongsToServiceContexts = new List<string>() { Constants.DIGOKFRIV },
-                Description = "",
-                IsPublic = true,
-                EvidenceSource = "Brreg",
-                Values = new List<EvidenceValue>()
-                {
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "default",
-                        Source = Constants.SourceLosoreregisteret,
-                        ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
-                    }
-                }
-            };
-        }
-
-        public static EvidenceCode GetDefinitionRettsstiftelserPerson()
-        {
-            return new EvidenceCode()
-            {
-                EvidenceCodeName = "RettsstiftelserPerson",
-                BelongsToServiceContexts = new List<string>() { Constants.EDUEDILIGENCE },
-                Description = "",
-                Values = new List<EvidenceValue>()
-                {
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "default",
-                        Source = Constants.SourceLosoreregisteret,
-                        ValueType = EvidenceValueType.JsonSchema,
-                        Description = $"Json payload from {Constants.SourceLosoreregisteret}",
-                        JsonSchemaDefintion = JsonSchema.FromType<LosoreV2>().ToJson(Formatting.None)
-                    }
-                },
-                AuthorizationRequirements = new List<Requirement>()
-                {
-                    new PartyTypeRequirement()
-                    {
-                        AllowedPartyTypes = new AllowedPartyTypesList()
-                        {
-                            new KeyValuePair<AccreditationPartyTypes, PartyTypeConstraint>(AccreditationPartyTypes.Subject, PartyTypeConstraint.PrivatePerson)
-                        }
-                    }
-                }
-            };
-        }
     }
 }

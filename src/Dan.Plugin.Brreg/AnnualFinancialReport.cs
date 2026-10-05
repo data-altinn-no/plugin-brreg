@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Dan.Plugin.Brreg.Config;
 using Microsoft.Azure.Functions.Worker;
@@ -96,13 +95,6 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             evidenceHarvesterRequest.TryGetParameter("Year", out string year);
 
-            if (string.IsNullOrEmpty(year) || !System.Text.RegularExpressions.Regex.IsMatch(year, @"^\d{4}$"))
-            {
-                throw new EvidenceSourcePermanentClientException(
-                    Constants.ERROR_NO_REPORT_AVAILABLE,
-                    "Year parameter is missing or invalid. Expected a 4-digit year.");
-            }
-
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
             return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReportPdf(organization, year));
@@ -135,61 +127,61 @@ namespace Nadobe.EvidenceSources.ES_BR
                     {
                         EvidenceValueName = "Year1",
                         ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year1PdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year2",
                         ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year2PdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year3",
                         ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year3PdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year4",
                         ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year4PdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year5",
                         ValueType = EvidenceValueType.String,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     },
                     new EvidenceValue
                     {
                         EvidenceValueName = "Year5PdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
+                        Source = Constants.SourceRegnskapsregisteret
                     }
                 },
                 AuthorizationRequirements = new List<Requirement>()
@@ -246,7 +238,8 @@ namespace Nadobe.EvidenceSources.ES_BR
                     new EvidenceValue
                     {
                         EvidenceValueName = "pdf",
-                        ValueType = EvidenceValueType.String,
+                        ValueType = EvidenceValueType.Attachment,
+                        MimeType = "application/pdf",
                         Source = Constants.SourceRegnskapsregisteret
                     }
                 },
@@ -282,31 +275,31 @@ namespace Nadobe.EvidenceSources.ES_BR
 
         private async Task<List<EvidenceValue>> GetAnnualFinancialReportPdf(string organization, string year)
         {
-            string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
-
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Accept.Clear();
-            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
-
-            if (!string.IsNullOrEmpty(_settings.RegnskapsregisteretUsername))
+            if (string.IsNullOrEmpty(year) || !System.Text.RegularExpressions.Regex.IsMatch(year, @"^\d{4}$"))
             {
-                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_settings.RegnskapsregisteretUsername}:{_settings.RegnskapsregisteretPw}"));
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", authString);
+                throw new EvidenceSourcePermanentClientException(
+                    Constants.ERROR_PARAMETERS_MISSING,
+                    "Year parameter is missing or invalid. Expected a 4-digit year.");
             }
 
-            var response = await _client.SendAsync(requestMessage);
+            string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
 
-            if (!response.IsSuccessStatusCode)
+            var response = await Requests.SendWithBasicAuth(_client, HttpMethod.Get, url,
+                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, _logger, accept: "*/*");
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 throw new EvidenceSourcePermanentClientException(
                     Constants.ERROR_NO_REPORT_AVAILABLE,
                     $"No PDF available for {organization} year {year}");
             }
 
+            Requests.EnsureSuccess(response, url, _logger);
+
             var pdfBytes = await response.Content.ReadAsByteArrayAsync();
 
             var eb = new EvidenceBuilder(_metadata, "AnnualFinancialReportPdf");
-            eb.AddEvidenceValue("pdf", Convert.ToBase64String(pdfBytes), Constants.SourceRegnskapsregisteret, false);
+            eb.AddEvidenceValue("pdf", pdfBytes, Constants.SourceRegnskapsregisteret, false);
 
             return eb.GetEvidenceValues();
         }
@@ -315,12 +308,16 @@ namespace Nadobe.EvidenceSources.ES_BR
         {
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/aar";
 
-            var response = await Requests.MakeRequest(url, _client,
-                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw,
-                HttpMethod.Get, _logger);
+            var response = await Requests.SendWithBasicAuth(_client, HttpMethod.Get, url,
+                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, _logger);
 
-            List<string> availableYears = JsonConvert.DeserializeObject<List<string>>(
-                    JsonConvert.SerializeObject(response));            
+            // Brreg answers 404 for an organization that has not filed any annual accounts
+            List<string> availableYears = null;
+            if (response.StatusCode != HttpStatusCode.NotFound)
+            {
+                Requests.EnsureSuccess(response, url, _logger);
+                availableYears = JsonConvert.DeserializeObject<List<string>>(await response.Content.ReadAsStringAsync());
+            }
 
             if (availableYears == null || !availableYears.Any())
             {

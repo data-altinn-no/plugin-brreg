@@ -16,12 +16,6 @@ namespace Dan.Plugin.Brreg.Config
 
         public string TilskuddsregisterUrl { get; set; }
 
-        public string ES_BR_ProductsUserName { get; set; }
-
-        public string ES_BR_ProductsPassword { get; set; }
-
-        public string BR_endpoint_address { get; set; }
-
         public string EktepaktPassword { get; set; }
 
         public string EktepaktUserName { get; set; }
