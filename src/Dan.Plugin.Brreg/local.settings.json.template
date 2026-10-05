@@ -6,9 +6,7 @@
     "EktepaktUserName": "",
     "EktepaktPassword": "",
     "EktepaktUri": "",
-    "RegnskapsregisteretUri": "", //
-    "RegnskapsregisteretPw": "",
-    "RegnskapsregisteretUsername": ""
+    "RegnskapsregisteretUri": ""
   },
   "ConnectionStrings": {
   }

@@ -97,7 +97,7 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             var organization = evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber;
 
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReportPdf(organization, year));
+            return await EvidenceSourceResponse.CreateResponse(req, () => GetAnnualFinancialReportPdf(req, organization, year));
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             return new EvidenceCode
             {
                 EvidenceCodeName = "AnnualFinancialReportPdf",
-                Description = "Returns the PDF for an annual financial report for a given year",
+                Description = "Returns the PDF for an annual financial report for a given year as a raw binary stream (no evidence envelope)",
                 IsAsynchronous = false,
                 BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                 Parameters = new List<EvidenceParameter>
@@ -238,8 +238,7 @@ namespace Nadobe.EvidenceSources.ES_BR
                     new EvidenceValue
                     {
                         EvidenceValueName = "pdf",
-                        ValueType = EvidenceValueType.Attachment,
-                        MimeType = "application/pdf",
+                        ValueType = EvidenceValueType.Binary,
                         Source = Constants.SourceRegnskapsregisteret
                     }
                 },
@@ -273,7 +272,11 @@ namespace Nadobe.EvidenceSources.ES_BR
             };
         }
 
-        private async Task<List<EvidenceValue>> GetAnnualFinancialReportPdf(string organization, string year)
+        /// <summary>
+        /// Streams the annual report PDF back to core as a raw binary response. The evidence value is declared as
+        /// <see cref="EvidenceValueType.Binary"/>, so core copies the body straight through to the consumer without an envelope.
+        /// </summary>
+        private async Task<HttpResponseData> GetAnnualFinancialReportPdf(HttpRequestData req, string organization, string year)
         {
             if (string.IsNullOrEmpty(year) || !System.Text.RegularExpressions.Regex.IsMatch(year, @"^\d{4}$"))
             {
@@ -284,32 +287,31 @@ namespace Nadobe.EvidenceSources.ES_BR
 
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/{year}";
 
-            var response = await Requests.SendWithBasicAuth(_client, HttpMethod.Get, url,
-                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, _logger, accept: "*/*");
+            using var upstream = await Requests.Send(_client, HttpMethod.Get, url, _logger, HttpCompletionOption.ResponseHeadersRead);
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            if (upstream.StatusCode == HttpStatusCode.NotFound)
             {
                 throw new EvidenceSourcePermanentClientException(
                     Constants.ERROR_NO_REPORT_AVAILABLE,
                     $"No PDF available for {organization} year {year}");
             }
 
-            Requests.EnsureSuccess(response, url, _logger);
+            Requests.EnsureSuccess(upstream, url, _logger);
 
-            var pdfBytes = await response.Content.ReadAsByteArrayAsync();
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            response.Headers.Add("Content-Type", "application/pdf");
 
-            var eb = new EvidenceBuilder(_metadata, "AnnualFinancialReportPdf");
-            eb.AddEvidenceValue("pdf", pdfBytes, Constants.SourceRegnskapsregisteret, false);
+            await using var pdfStream = await upstream.Content.ReadAsStreamAsync();
+            await pdfStream.CopyToAsync(response.Body);
 
-            return eb.GetEvidenceValues();
+            return response;
         }
 
         private async Task<List<EvidenceValue>> GetAnnualFinancialReports(string organization, int numberOfYears)
         {
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/aarsregnskap/kopi/{organization}/aar";
 
-            var response = await Requests.SendWithBasicAuth(_client, HttpMethod.Get, url,
-                _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, _logger);
+            var response = await Requests.Send(_client, HttpMethod.Get, url, _logger);
 
             // Brreg answers 404 for an organization that has not filed any annual accounts
             List<string> availableYears = null;

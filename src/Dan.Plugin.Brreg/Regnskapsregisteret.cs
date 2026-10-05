@@ -59,7 +59,7 @@ namespace ES_BR
         {
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/{orgno}?%C3%A5={year}&regnskapstype={type.ToUpper()}";
 
-            var result = await Requests.MakeRequest(url, _client, _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, HttpMethod.Get, _logger);
+            var result = await Requests.MakeRequest(url, _client, HttpMethod.Get, _logger);
 
             var ecb = new EvidenceBuilder(_metadata, "Regnskapsregisteret");
             ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(result), Constants.SourceRegnskapsregisteret, false);
@@ -70,7 +70,7 @@ namespace ES_BR
         {
             string url = $"{_settings.RegnskapsregisteretUri}/regnskapsregisteret/regnskap/{orgno}/{id}";
 
-            var result = await Requests.MakeRequest(url, _client, _settings.RegnskapsregisteretUsername, _settings.RegnskapsregisteretPw, HttpMethod.Get, _logger);
+            var result = await Requests.MakeRequest(url, _client, HttpMethod.Get, _logger);
 
             var ecb = new EvidenceBuilder(_metadata, "Regnskapsregisteret");
             ecb.AddEvidenceValue("default", JsonConvert.SerializeObject(result), Constants.SourceRegnskapsregisteret, false);
