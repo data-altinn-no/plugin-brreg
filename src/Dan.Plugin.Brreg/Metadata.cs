@@ -40,26 +40,20 @@ namespace Nadobe.EvidenceSources.ES_BR {
         public List<EvidenceCode> GetEvidenceCodes()
         {
             return new List<EvidenceCode>
-            {
-                CertificateOfRegistration.GetDefinition(),
-                //CertificateOfRegistration.GetDefinitionOpen(),
+            {            
                 AnnualFinancialReport.GetDefinition(),
-                //AnnualFinancialReport.GetDefinitionOpen(),
-                UnitBasicInformation.GetDefinition(),              
-                Konkurs.GetDefinition(),               
+                AnnualFinancialReport.GetDefinitionPdf(),
+                UnitBasicInformation.GetDefinition(),
+                Konkurs.GetDefinition(),
                 Regnskapsregisteret.GetDefinitionRegnskap(),
                 Regnskapsregisteret.GetDefinitionRegnskapId(),
-                //Regnskapsregisteret.GetDefinitionRegnskapOpen(),
                 Roller.GetDefinition(),
                 Kunngjoringer.GetDefinition(),
                 Ektepakt.GetDefinitionEktepaktV2(),
                 Losore.GetDefinitionRettsstiftelserKjoretoy(),
-                //Losore.GetDefinitionRettsstiftelserPerson(),
                 Losore.GetDefinitionRettsstiftelserVirksomhet(),
                 Stotteregisteret.GetDefinition(),
-                Tilskuddsregisteret.GetDefinition(),
-                Registerutskrift.GetDefinition(),
-                //Losore.GetDefinitionRettsstiftelserVirksomhetOpen(),
+                Tilskuddsregisteret.GetDefinition(),               
                 Frivillighetsregisteret.GetDefinitionFrivilligOrganisation(),
                 UnitBasicInformation.GetDefinitionVirksomhetsinformasjon(),
             };
