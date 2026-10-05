@@ -32,6 +32,8 @@ namespace Dan.Plugin.Brreg.Models
         public const string DIGOKFRIV = "Digøk-friv";
         public const string ALTINNSTUDIOAPPS = "Altinn Studio-apps";
 
+        public const string ADVOKAT = "Advokatregisteret";
+
         public static string SourceStotteRegisteret = "Støtteregisteret";
 
         public const string SourceTilskuddsregisteret = "Tilskudd.no";

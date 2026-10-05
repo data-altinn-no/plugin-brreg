@@ -111,7 +111,7 @@ namespace Nadobe.EvidenceSources.ES_BR
             {
                 EvidenceCodeName = "UnitBasicInformation",
                 Description = "Return units basic information for the subject company",
-                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV, Constants.ALTINNSTUDIOAPPS },
+                BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.EDUEDILIGENCE, Constants.SERIOSITET, Constants.DIGOKFRIV, Constants.ALTINNSTUDIOAPPS, Constants.ADVOKAT },
                 IsPublic = true,
                 Values = new List<EvidenceValue>
                 {
