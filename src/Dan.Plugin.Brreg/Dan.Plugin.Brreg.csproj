@@ -11,6 +11,7 @@
     <Content Include="Config\EktepaktTemplate.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="local.settings.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" />
