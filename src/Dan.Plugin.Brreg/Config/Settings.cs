@@ -1,4 +1,3 @@
-using Dan.Plugin.Skatteetaten.Config;
 using System;
 using System.IO;
 using System.Runtime.ConstrainedExecution;
@@ -41,18 +40,12 @@ namespace Dan.Plugin.Brreg.Config
         public string LosoreURI { get; set; }
 
         public string EktepaktV2Uri { get; set; }
-        private string EncodedX509Cert { get; set; }
 
-        public string Certificate
-        {
-            get
-            {
-                return EncodedX509Cert ?? new PluginKeyVault(VaultName).GetCertificateAsBase64(CertName).Result;
-            }
-            set
-            {
-                EncodedX509Cert = value;
-            }
-        }
+        /// <summary>
+        /// Base64-encoded Maskinporten certificate. Set from the Certificate setting when present, otherwise loaded
+        /// from Key Vault once at startup in Program.cs. It must not be fetched lazily here: the options binder reads
+        /// every property synchronously, and a blocking Key Vault call there deadlocks worker startup.
+        /// </summary>
+        public string Certificate { get; set; }
     }
 }
