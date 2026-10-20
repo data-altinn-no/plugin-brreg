@@ -162,9 +162,9 @@ namespace Dan.Plugin.Brreg.Helpers
             Requests.EnsureSuccess(pageResponse, pageUrl, logger);
             var html = await pageResponse.Content.ReadAsStringAsync();
 
-            // A chunk that fails to download should not stop the scan: a stale reference after a deploy is skipped, and a
-            // network error is remembered so that, if no later chunk has the action, the failure is reported as transient
-            // rather than as a permanent change of the site.
+            // A chunk that fails to download should not stop the scan: a stale reference after a deploy (404) is skipped, and
+            // a network error or temporary HTTP status is remembered so that, if no later chunk has the action, the failure
+            // is reported as transient rather than as a permanent change of the site.
             EvidenceSourceTransientException transientFailure = null;
             var chunks = ChunkUrl.Matches(html).Select(x => x.Value).Distinct();
             foreach (var chunk in chunks)
@@ -174,9 +174,16 @@ namespace Dan.Plugin.Brreg.Helpers
                 try
                 {
                     using var chunkResponse = await Requests.Send(client, HttpMethod.Get, chunkUrl, logger);
+                    if (chunkResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        logger.LogWarning($"Skipping stale chunk {chunkUrl}");
+                        continue;
+                    }
                     if (!chunkResponse.IsSuccessStatusCode)
                     {
                         logger.LogWarning($"Skipping chunk {chunkUrl} - status {(int)chunkResponse.StatusCode}");
+                        transientFailure ??= new EvidenceSourceTransientException(Constants.ERROR_CCR_UPSTREAM_ERROR,
+                            $"Call to data source failed with status {(int)chunkResponse.StatusCode}");
                         continue;
                     }
                     js = await chunkResponse.Content.ReadAsStringAsync();
