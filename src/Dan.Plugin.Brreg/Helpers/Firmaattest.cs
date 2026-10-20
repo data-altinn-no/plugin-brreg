@@ -162,18 +162,31 @@ namespace Dan.Plugin.Brreg.Helpers
             Requests.EnsureSuccess(pageResponse, pageUrl, logger);
             var html = await pageResponse.Content.ReadAsStringAsync();
 
+            // A chunk that fails to download should not stop the scan: a stale reference after a deploy is skipped, and a
+            // network error is remembered so that, if no later chunk has the action, the failure is reported as transient
+            // rather than as a permanent change of the site.
+            EvidenceSourceTransientException transientFailure = null;
             var chunks = ChunkUrl.Matches(html).Select(x => x.Value).Distinct();
             foreach (var chunk in chunks)
             {
                 var chunkUrl = Base + chunk;
-                using var chunkResponse = await Requests.Send(client, HttpMethod.Get, chunkUrl, logger);
-                if (!chunkResponse.IsSuccessStatusCode)
+                string js;
+                try
                 {
-                    // A stale chunk reference after a deploy should not stop the scan of the remaining chunks.
-                    logger.LogWarning($"Skipping chunk {chunkUrl} - status {(int)chunkResponse.StatusCode}");
+                    using var chunkResponse = await Requests.Send(client, HttpMethod.Get, chunkUrl, logger);
+                    if (!chunkResponse.IsSuccessStatusCode)
+                    {
+                        logger.LogWarning($"Skipping chunk {chunkUrl} - status {(int)chunkResponse.StatusCode}");
+                        continue;
+                    }
+                    js = await chunkResponse.Content.ReadAsStringAsync();
+                }
+                catch (EvidenceSourceTransientException e)
+                {
+                    logger.LogWarning($"Skipping chunk {chunkUrl} after a transient failure: {e.Message}");
+                    transientFailure ??= e;
                     continue;
                 }
-                var js = await chunkResponse.Content.ReadAsStringAsync();
 
                 var match = GeneratePdfAction.Match(js);
                 if (match.Success)
@@ -181,6 +194,12 @@ namespace Dan.Plugin.Brreg.Helpers
                     CacheActionId(match.Groups[1].Value);
                     return match.Groups[1].Value;
                 }
+            }
+
+            if (transientFailure != null)
+            {
+                logger.LogError($"generatePdf server action not found on {pageUrl} after transient chunk failures");
+                throw transientFailure;
             }
 
             logger.LogError($"generatePdf server action not found on {pageUrl} - the site has probably changed");
