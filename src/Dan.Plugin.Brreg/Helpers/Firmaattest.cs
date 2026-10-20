@@ -50,7 +50,8 @@ namespace Dan.Plugin.Brreg.Helpers
             var cachedActionId = GetCachedActionId();
             var actionId = cachedActionId ?? await FindActionIdAsync(client, pageUrl, logger);
 
-            // With a cached id, a failed generation may just mean the site was redeployed: rediscover once and retry.
+            // With a cached id, an unknown-action response may just mean the site was redeployed: rediscover once and retry.
+            // Other failures are thrown as classified errors without touching the cache.
             var pdf = await TryGeneratePdfAsync(client, pageUrl, actionId, orgnr, underenhet, logger, throwOnFailure: cachedActionId == null);
             if (pdf == null)
             {
@@ -65,8 +66,9 @@ namespace Dan.Plugin.Brreg.Helpers
 
         /// <summary>
         /// Calls the generatePdf server action and extracts the PDF from the RSC response. When <paramref name="throwOnFailure"/>
-        /// is false, a non-success status or a response without a binary row returns null so the caller can retry with a fresh
-        /// action id; otherwise those failures are thrown as classified DAN exceptions.
+        /// is false, the responses that indicate an unknown action id (404, or a successful response without a binary row)
+        /// return null so the caller can retry with a fresh id. Every other failure, such as 401, 403 or 5xx, is thrown as a
+        /// classified DAN exception regardless, since rediscovering the action id cannot help there.
         /// </summary>
         private static async Task<byte[]> TryGeneratePdfAsync(HttpClient client, string pageUrl, string actionId, string orgnr,
             bool underenhet, ILogger logger, bool throwOnFailure)
@@ -80,14 +82,11 @@ namespace Dan.Plugin.Brreg.Helpers
             request.Headers.Add("Accept", "text/x-component");
 
             using var response = await Requests.Send(client, request, logger);
-            if (!response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.NotFound && !throwOnFailure)
             {
-                if (!throwOnFailure)
-                {
-                    return null;
-                }
-                Requests.EnsureSuccess(response, pageUrl, logger);
+                return null;
             }
+            Requests.EnsureSuccess(response, pageUrl, logger);
 
             var bytes = await response.Content.ReadAsByteArrayAsync();
 
