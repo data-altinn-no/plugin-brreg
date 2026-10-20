@@ -13,6 +13,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Net.Http;
 using Dan.Plugin.Brreg.Models;
@@ -125,7 +126,8 @@ namespace Dan.Plugin.Brreg {
             }
             catch (Exception ex)
             {
-                throw new EvidenceSourceTransientException(Constants.ERROR_PRODUCT_LIST_NOT_AVAILABLE, "Unable to retrieve product list for this organization");
+                _logger.LogError(ex, $"Product list request failed for {organization}");
+                throw new EvidenceSourceTransientException(Constants.ERROR_PRODUCT_LIST_NOT_AVAILABLE, "Unable to retrieve product list for this organization", ex);
             }
 
             if (availableProducts == null || availableProducts.Length != 1)
@@ -135,10 +137,26 @@ namespace Dan.Plugin.Brreg {
                     "Unable to order certificate of registration for this organization");
             }
 
-            var orderResult = await BRProductsService.OrderProducts(organization, availableProducts, _settings);
-            var eb = new EvidenceBuilder(_metadata, nameof(CertificateOfRegistration));
+            OrderedProduct[] orderResult;
+            try
+            {
+                orderResult = await BRProductsService.OrderProducts(organization, availableProducts, _settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Product order failed for {organization}");
+                throw new EvidenceSourceTransientException(Constants.ERROR_CERTIFICATE_OF_REGISTRATION_NOT_AVAILABLE, "Unable to order certificate of registration for this organization", ex);
+            }
 
-            eb.AddEvidenceValue($"CertificateOfRegistrationPdfUrl", orderResult[0].Url);
+            var url = orderResult?.FirstOrDefault()?.Url;
+            if (string.IsNullOrEmpty(url))
+            {
+                _logger.LogError($"Product order for {organization} returned no URL");
+                throw new EvidenceSourcePermanentServerException(Constants.ERROR_CERTIFICATE_OF_REGISTRATION_NOT_AVAILABLE, "Ordered certificate of registration has no URL");
+            }
+
+            var eb = new EvidenceBuilder(_metadata, nameof(CertificateOfRegistration));
+            eb.AddEvidenceValue("CertificateOfRegistrationPdfUrl", url);
 
             return eb.GetEvidenceValues();
         }

@@ -28,6 +28,13 @@ namespace Dan.Plugin.Brreg.Helpers
         private static readonly Regex GeneratePdfAction =
             new(@"createServerReference\)\(""([0-9a-f]+)"",[^)]*""generatePdf""\)", RegexOptions.Compiled);
 
+        // The action id only changes when the site is deployed, so it is cached across requests and rediscovered
+        // when a cached id stops producing a PDF.
+        private static readonly TimeSpan ActionIdTtl = TimeSpan.FromHours(1);
+        private static readonly object ActionIdLock = new();
+        private static string _actionId;
+        private static DateTime _actionIdExpires;
+
         /// <summary>
         /// The public lookup page for the organization, which is where the firmaattest PDF is generated from.
         /// </summary>
@@ -39,8 +46,31 @@ namespace Dan.Plugin.Brreg.Helpers
         public static async Task<byte[]> DownloadAsync(HttpClient client, string orgnr, ILogger logger, bool underenhet = false)
         {
             var pageUrl = GetLookupPageUrl(orgnr, underenhet);
-            var actionId = await FindActionIdAsync(client, pageUrl, logger);
 
+            var cachedActionId = GetCachedActionId();
+            var actionId = cachedActionId ?? await FindActionIdAsync(client, pageUrl, logger);
+
+            // With a cached id, a failed generation may just mean the site was redeployed: rediscover once and retry.
+            var pdf = await TryGeneratePdfAsync(client, pageUrl, actionId, orgnr, underenhet, logger, throwOnFailure: cachedActionId == null);
+            if (pdf == null)
+            {
+                logger.LogInformation($"Cached generatePdf action id did not produce a PDF for {orgnr}, rediscovering");
+                InvalidateActionId();
+                actionId = await FindActionIdAsync(client, pageUrl, logger);
+                pdf = await TryGeneratePdfAsync(client, pageUrl, actionId, orgnr, underenhet, logger, throwOnFailure: true);
+            }
+
+            return pdf;
+        }
+
+        /// <summary>
+        /// Calls the generatePdf server action and extracts the PDF from the RSC response. When <paramref name="throwOnFailure"/>
+        /// is false, a non-success status or a response without a binary row returns null so the caller can retry with a fresh
+        /// action id; otherwise those failures are thrown as classified DAN exceptions.
+        /// </summary>
+        private static async Task<byte[]> TryGeneratePdfAsync(HttpClient client, string pageUrl, string actionId, string orgnr,
+            bool underenhet, ILogger logger, bool throwOnFailure)
+        {
             var body = $$"""[{"withSignature":true,"enhetsType":"{{(underenhet ? "underenhet" : "hovedenhet")}}","orgnr":"{{orgnr}}","openSections":"firmaattest","lang":"nb"}]""";
             using var request = new HttpRequestMessage(HttpMethod.Post, pageUrl)
             {
@@ -50,7 +80,15 @@ namespace Dan.Plugin.Brreg.Helpers
             request.Headers.Add("Accept", "text/x-component");
 
             using var response = await Requests.Send(client, request, logger);
-            Requests.EnsureSuccess(response, pageUrl, logger);
+            if (!response.IsSuccessStatusCode)
+            {
+                if (!throwOnFailure)
+                {
+                    return null;
+                }
+                Requests.EnsureSuccess(response, pageUrl, logger);
+            }
+
             var bytes = await response.Content.ReadAsByteArrayAsync();
 
             // Latin1 maps each byte to one char, so string offsets equal byte offsets.
@@ -58,13 +96,59 @@ namespace Dan.Plugin.Brreg.Helpers
             var match = BinaryRow.Match(text);
             if (!match.Success)
             {
+                if (!throwOnFailure)
+                {
+                    return null;
+                }
                 logger.LogError($"No firmaattest PDF in response for {orgnr}: {text[..Math.Min(300, text.Length)]}");
                 throw new EvidenceSourcePermanentClientException(Constants.ERROR_CERTIFICATE_OF_REGISTRATION_NOT_AVAILABLE,
                     "Unable to retrieve certificate of registration for this organization");
             }
 
             var length = int.Parse(match.Groups[1].Value, NumberStyles.HexNumber);
-            return bytes.AsSpan(match.Index + match.Length, length).ToArray();
+            var start = match.Index + match.Length;
+            if (length <= 0 || start + length > bytes.Length)
+            {
+                logger.LogError($"Firmaattest binary row for {orgnr} declares {length} bytes but only {bytes.Length - start} are available");
+                throw new EvidenceSourceTransientException(Constants.ERROR_CCR_UPSTREAM_ERROR,
+                    "Incomplete certificate of registration received from the data source");
+            }
+
+            var pdf = bytes.AsSpan(start, length);
+            if (!pdf.StartsWith("%PDF"u8))
+            {
+                logger.LogError($"Firmaattest binary row for {orgnr} is not a PDF");
+                throw new EvidenceSourcePermanentServerException(Constants.ERROR_CCR_UPSTREAM_ERROR,
+                    "Unexpected certificate of registration format at the data source");
+            }
+
+            return pdf.ToArray();
+        }
+
+        private static string GetCachedActionId()
+        {
+            lock (ActionIdLock)
+            {
+                return DateTime.UtcNow < _actionIdExpires ? _actionId : null;
+            }
+        }
+
+        private static void CacheActionId(string actionId)
+        {
+            lock (ActionIdLock)
+            {
+                _actionId = actionId;
+                _actionIdExpires = DateTime.UtcNow + ActionIdTtl;
+            }
+        }
+
+        private static void InvalidateActionId()
+        {
+            lock (ActionIdLock)
+            {
+                _actionId = null;
+                _actionIdExpires = DateTime.MinValue;
+            }
         }
 
         // The action ID changes on every deploy, so look it up from the page's JS chunks.
@@ -84,12 +168,18 @@ namespace Dan.Plugin.Brreg.Helpers
             {
                 var chunkUrl = Base + chunk;
                 using var chunkResponse = await Requests.Send(client, HttpMethod.Get, chunkUrl, logger);
-                Requests.EnsureSuccess(chunkResponse, chunkUrl, logger);
+                if (!chunkResponse.IsSuccessStatusCode)
+                {
+                    // A stale chunk reference after a deploy should not stop the scan of the remaining chunks.
+                    logger.LogWarning($"Skipping chunk {chunkUrl} - status {(int)chunkResponse.StatusCode}");
+                    continue;
+                }
                 var js = await chunkResponse.Content.ReadAsStringAsync();
 
                 var match = GeneratePdfAction.Match(js);
                 if (match.Success)
                 {
+                    CacheActionId(match.Groups[1].Value);
                     return match.Groups[1].Value;
                 }
             }

@@ -107,7 +107,7 @@ namespace Dan.Plugin.Brreg.Helpers
 
             public TResult GetResult()
             {
-                return task.Result;
+                return task.GetAwaiter().GetResult();
             }
 
             // INotifyCompletion
