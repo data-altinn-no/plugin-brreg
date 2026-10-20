@@ -20,7 +20,17 @@ public class PluginKeyVault
     /// <param name="vaultName">Name of the Key Vault</param>
     public PluginKeyVault(string vaultName)
     {
-        SecretClient = new SecretClient(new Uri($"https://{vaultName}.vault.azure.net/"), new DefaultAzureCredential());
+        // Managed identity is only probed when the app runs in Azure with an identity endpoint configured. Outside Azure the
+        // probe of the instance metadata address is retried with long connect timeouts in recent Azure.Core versions, which
+        // takes longer than the Functions host allows for worker startup.
+        var hasManagedIdentityEndpoint = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"))
+                                         || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSI_ENDPOINT"));
+        var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+        {
+            ExcludeManagedIdentityCredential = !hasManagedIdentityEndpoint
+        });
+
+        SecretClient = new SecretClient(new Uri($"https://{vaultName}.vault.azure.net/"), credential);
     }
 
     /// <summary>

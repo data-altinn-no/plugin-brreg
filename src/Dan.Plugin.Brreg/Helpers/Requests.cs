@@ -92,12 +92,23 @@ namespace Dan.Plugin.Brreg.Helpers
         /// Network failures and timeouts are reported as transient upstream errors; the caller decides how to treat the status code,
         /// typically by handling 404 itself and passing everything else to <see cref="EnsureSuccess"/>.
         /// </summary>
-        public static async Task<HttpResponseMessage> Send(HttpClient client, HttpMethod method, string url, ILogger logger,
+        public static Task<HttpResponseMessage> Send(HttpClient client, HttpMethod method, string url, ILogger logger,
             HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
+            return Send(client, new HttpRequestMessage(method, url), logger, completionOption);
+        }
+
+        /// <summary>
+        /// Sends a prepared request and returns the raw response, with the same network-failure classification as
+        /// <see cref="Send(HttpClient, HttpMethod, string, ILogger, HttpCompletionOption)"/>.
+        /// </summary>
+        public static async Task<HttpResponseMessage> Send(HttpClient client, HttpRequestMessage request, ILogger logger,
+            HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+        {
+            var url = request.RequestUri?.ToString();
             try
             {
-                return await client.SendAsync(new HttpRequestMessage(method, url), completionOption);
+                return await client.SendAsync(request, completionOption);
             }
             catch (HttpRequestException e)
             {
