@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using Dan.Plugin.Brreg.Models;
-using Dan.Plugin.Brreg.Helpers;
 
 namespace Dan.Plugin.Brreg {
 
@@ -26,17 +25,16 @@ namespace Dan.Plugin.Brreg {
     /// </summary>  
     public class CertificateOfRegistration
     {
-        private readonly Settings _settings;
+        private const int REPORT_CODE = 2000;
+        private Settings _settings;
         private readonly IEvidenceSourceMetadata _metadata;
         private readonly ILogger _logger;
-        private readonly HttpClient _client;
 
-        public CertificateOfRegistration(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
+    public CertificateOfRegistration(IOptions<Settings> settings, IEvidenceSourceMetadata evidenceSourceMetadata, ILoggerFactory loggerFactory)
         {
             _settings = settings.Value;
             _metadata = evidenceSourceMetadata;
             _logger = loggerFactory.CreateLogger<CertificateOfRegistration>();
-            _client = httpClientFactory.CreateClient("SafeHttpClient");
         }
 
         /// <summary>
@@ -53,8 +51,9 @@ namespace Dan.Plugin.Brreg {
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
+            return await EvidenceSourceResponse.CreateResponse(req, ()=> GetCertificateOfRegistration(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber));
         }
+
 
         /// <summary>
         /// Function entry point: Certificate of Registration
@@ -82,7 +81,7 @@ namespace Dan.Plugin.Brreg {
             return new EvidenceCode()
             {
                 EvidenceCodeName = nameof(CertificateOfRegistration),
-                Description = "Code for retrieving the certificate of registration (firmaattest) as a base64-encoded PDF attachment",
+                Description = "Code for retrieving URL to a PDF for the certificate of registration",
                 ServiceContext = "eBevis",
                 BelongsToServiceContexts = new List<string>() { Constants.EBEVIS, Constants.SERIOSITET, Constants.EDUEDILIGENCE },
                 Values = new List<EvidenceValue>
@@ -91,13 +90,6 @@ namespace Dan.Plugin.Brreg {
                     {
                         EvidenceValueName = "CertificateOfRegistrationPdfUrl",
                         ValueType = EvidenceValueType.Uri,
-                        Source = Constants.SourceEnhetsregisteret
-                    },
-                    new EvidenceValue()
-                    {
-                        EvidenceValueName = "CertificateOfRegistrationPdf",
-                        ValueType = EvidenceValueType.Attachment,
-                        MimeType = "application/pdf",
                         Source = Constants.SourceEnhetsregisteret
                     }
                 },
@@ -121,20 +113,32 @@ namespace Dan.Plugin.Brreg {
                     }
                 }
             };
-        }    
+        }
 
 
-        /// <summary>
-        /// Returns the firmaattest PDF as an <see cref="EvidenceValueType.Attachment"/>. EvidenceBuilder base64-encodes
-        /// the raw bytes. The URL value points at the public lookup page the PDF is generated from.
-        /// </summary>
         private async Task<List<EvidenceValue>> GetCertificateOfRegistration(string organization)
         {
-            var pdfBytes = await Helpers.Firmaattest.DownloadAsync(_client, organization, _logger);
+            Product[] availableProducts;
+            try
+            {
+                availableProducts = await BRProductsService.GetProductList(organization, REPORT_CODE, _settings);
+            }
+            catch (Exception ex)
+            {
+                throw new EvidenceSourceTransientException(Constants.ERROR_PRODUCT_LIST_NOT_AVAILABLE, "Unable to retrieve product list for this organization");
+            }
 
+            if (availableProducts == null || availableProducts.Length != 1)
+            {
+                throw new EvidenceSourcePermanentClientException(
+                    Constants.ERROR_CERTIFICATE_OF_REGISTRATION_NOT_AVAILABLE,
+                    "Unable to order certificate of registration for this organization");
+            }
+
+            var orderResult = await BRProductsService.OrderProducts(organization, availableProducts, _settings);
             var eb = new EvidenceBuilder(_metadata, nameof(CertificateOfRegistration));
-            eb.AddEvidenceValue("CertificateOfRegistrationPdfUrl", Helpers.Firmaattest.GetLookupPageUrl(organization), Constants.SourceEnhetsregisteret, false);
-            eb.AddEvidenceValue("CertificateOfRegistrationPdf", pdfBytes, Constants.SourceEnhetsregisteret, false);
+
+            eb.AddEvidenceValue($"CertificateOfRegistrationPdfUrl", orderResult[0].Url);
 
             return eb.GetEvidenceValues();
         }

@@ -3,6 +3,9 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+    "ES_BR_ProductsPassword": "",
+    "ES_BR_ProductsUsername": "",
+    "BR_Endpoint_Address": "",
     "EktepaktUserName": "",
     "EktepaktPassword": "",
     "EktepaktUri": "",

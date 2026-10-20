@@ -42,6 +42,7 @@ namespace Nadobe.EvidenceSources.ES_BR {
             return new List<EvidenceCode>
             {
                 CertificateOfRegistration.GetDefinition(),
+                CertificateOfRegistrationBeta.GetDefinition(),
                 AnnualFinancialReport.GetDefinition(),
                 AnnualFinancialReport.GetDefinitionPdf(),
                 UnitBasicInformation.GetDefinition(),
