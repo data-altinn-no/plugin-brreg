@@ -62,7 +62,16 @@ namespace Nadobe.EvidenceSources.ES_BR
             _logger = context.GetLogger(context.FunctionDefinition.Name);
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var evidenceHarvesterRequest = JsonConvert.DeserializeObject<EvidenceHarvesterRequest>(requestBody);
-            return await EvidenceSourceResponse.CreateResponse(req, () => GetUnitBasicInformationFromBrreg(evidenceHarvesterRequest.SubjectParty.NorwegianOrganizationNumber, _client));
+            return await EvidenceSourceResponse.CreateResponse(req, () =>
+            {
+                var orgNo = evidenceHarvesterRequest?.SubjectParty?.NorwegianOrganizationNumber;
+                if (string.IsNullOrEmpty(orgNo))
+                {
+                    throw new EvidenceSourcePermanentClientException(Constants.ERROR_ORGANIZATION_NOT_FOUND, "The request did not contain a subject organization number");
+                }
+
+                return GetUnitBasicInformationFromBrreg(orgNo, _client);
+            });
         }
 
         /// <summary>
